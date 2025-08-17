@@ -112,6 +112,40 @@ This repository includes a `chinese-to-english-translator` agent in `.claude/age
 - Maintaining translation consistency
 - Handling future translation needs
 
+## Local Installation
+
+To install your English translation version instead of the marketplace version:
+
+### Quick Install
+```bash
+# Run the automated installation script
+./install-local.sh
+```
+
+### Manual Installation
+```bash
+# Uninstall marketplace version
+cursor --uninstall-extension heisebaiyun.kiro-for-cc
+
+# Build and install local version
+npm run package
+cursor --install-extension kiro-for-cc-0.2.6.vsix
+```
+
+### Updating Your Local Version
+When you make changes to the translation or pull upstream updates:
+```bash
+# Option 1: Use the script (recommended)
+./install-local.sh
+
+# Option 2: Manual process
+npm run package
+cursor --uninstall-extension heisebaiyun.kiro-for-cc
+cursor --install-extension kiro-for-cc-*.vsix
+```
+
+**Note**: The extension installs globally for your user profile, so it's automatically available in all future Cursor instances.
+
 ## Branch Commands Reference
 
 ```bash
