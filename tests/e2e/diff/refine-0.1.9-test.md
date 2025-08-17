@@ -38,10 +38,10 @@
 
   After refining, overwrite the original file with the improved content.
 
-⏺ 我来查看并优化这个产品开发指导文档。
+⏺ I will review and optimize this product development guidance document.
 
 ⏺ Read(.claude/steering/product.md)
   ⎿  Read 3 lines (ctrl+r to expand)
 
-⏺ 让我先查看项目的具体代码结构和实际实现，以便写出更具体的产品开发指导。
+⏺ Let me first examine the project's specific code structure and actual implementation to write more specific product development guidance.
 ```

@@ -1,86 +1,86 @@
-# 需求文档
+# Requirements Document
 
-## 简介
+## Introduction
 
-本功能实现了一个智能的 Claude Code 权限验证系统，确保权限真正被授予并生效，而不仅仅依赖用户的确认点击。系统将主动检测权限状态、执行双向验证、提供智能重试机制，并在整个验证过程中保持流畅的用户体验。
+This feature implements an intelligent Claude Code permission verification system that ensures permissions are truly granted and effective, rather than just relying on user confirmation clicks. The system will actively detect permission status, perform bidirectional verification, provide intelligent retry mechanisms, and maintain a smooth user experience throughout the verification process.
 
-## 需求
+## Requirements
 
-### 需求 1: Permission Status Detection（权限状态检测）
+### Requirement 1: Permission Status Detection
 
-**用户故事:** 作为开发者，我希望系统能主动检测 Claude Code 的实际权限状态，这样我可以确信权限真正被授予。
+**User Story:** As a developer, I want the system to actively detect the actual permission status of Claude Code, so I can be confident that permissions are truly granted.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. WHEN 系统启动 THEN 系统 SHALL 检查 Claude Code 的当前权限状态
-2. WHEN 检查权限时 THEN 系统 SHALL 查询实际的 Claude Code process 或 configuration state
-3. IF Claude Code 未安装 THEN 系统 SHALL 检测到这种情况并适当地报告
-4. WHEN 获取到权限状态 THEN 系统 SHALL 区分 granted（已授予）、denied（已拒绝）和 unknown（未知）状态
-5. IF 权限检查因系统错误失败 THEN 系统 SHALL 记录错误并提供 fallback behavior
+1. WHEN system starts up THEN system SHALL check current permission status of Claude Code
+2. WHEN checking permissions THEN system SHALL query actual Claude Code process or configuration state
+3. IF Claude Code is not installed THEN system SHALL detect this condition and report appropriately
+4. WHEN permission status is obtained THEN system SHALL distinguish between granted, denied, and unknown states
+5. IF permission check fails due to system error THEN system SHALL log error and provide fallback behavior
 
-### 需求 2: Bidirectional Verification（双向验证）
+### Requirement 2: Bidirectional Verification
 
-**用户故事:** 作为系统管理员，我希望权限验证能确认实际效果而不仅仅是用户点击，这样我可以信任系统的安全状态。
+**User Story:** As a system administrator, I want permission verification to confirm actual effects rather than just user clicks, so I can trust the system's security state.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. WHEN 用户声称已授予权限 THEN 系统 SHALL 根据实际的 Claude Code state 验证此声明
-2. AFTER 用户授予权限 THEN 系统 SHALL 通过尝试一个安全操作来测试权限
-3. IF 测试操作成功 THEN 系统 SHALL 确认权限已生效
-4. IF 测试操作失败 THEN 系统 SHALL 识别权限未生效
-5. WHEN 验证完成 THEN 系统 SHALL 向用户提供清晰的状态反馈
-6. IF 用户声明与实际状态不匹配 THEN 系统 SHALL 标记这种差异
+1. WHEN user claims to have granted permissions THEN system SHALL verify this claim against actual Claude Code state
+2. AFTER user grants permissions THEN system SHALL test permissions by attempting a safe operation
+3. IF test operation succeeds THEN system SHALL confirm permissions are effective
+4. IF test operation fails THEN system SHALL identify that permissions are not effective
+5. WHEN verification completes THEN system SHALL provide clear status feedback to user
+6. IF user claim doesn't match actual state THEN system SHALL flag this discrepancy
 
-### 需求 3: Smart Retry Mechanism（智能重试机制）
+### Requirement 3: Smart Retry Mechanism
 
-**用户故事:** 作为用户，我希望当权限未正确设置时，系统能自动引导我进行重试，这样我可以成功完成权限设置。
+**User Story:** As a user, I want the system to automatically guide me through retries when permissions are not set correctly, so I can successfully complete the permission setup.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. WHEN 权限验证失败 THEN 系统 SHALL 自动提供重试选项
-2. IF 用户接受重试 THEN 系统 SHALL 提供清晰的分步说明
-3. WHEN 重试时 THEN 系统 SHALL 跟踪尝试次数
-4. IF 重试次数超过 3 次 THEN 系统 SHALL 提供替代解决方案或支持选项
-5. WHEN 引导重试时 THEN 系统 SHALL 突出显示之前尝试中可能出错的地方
-6. AFTER 每次重试尝试 THEN 系统 SHALL 重新验证权限状态
-7. IF 重试后权限成功授予 THEN 系统 SHALL 向用户确认成功
+1. WHEN permission verification fails THEN system SHALL automatically provide retry option
+2. IF user accepts retry THEN system SHALL provide clear step-by-step instructions
+3. WHEN retrying THEN system SHALL track number of attempts
+4. IF retry count exceeds 3 attempts THEN system SHALL provide alternative solutions or support options
+5. WHEN guiding retry THEN system SHALL highlight what might have gone wrong in previous attempts
+6. AFTER each retry attempt THEN system SHALL re-verify permission status
+7. IF permissions are successfully granted after retry THEN system SHALL confirm success to user
 
-### 需求 4: User Experience Optimization（用户体验优化）
+### Requirement 4: User Experience Optimization
 
-**用户故事:** 作为用户，我希望权限验证过程流畅且非侵入式，这样我可以快速让 Claude Code 工作而不感到挫败。
+**User Story:** As a user, I want the permission verification process to be smooth and non-intrusive, so I can quickly get Claude Code working without feeling frustrated.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. WHEN 验证权限时 THEN 系统 SHALL 在 3 秒内完成检查
-2. IF 验证正在进行中 THEN 系统 SHALL 显示清晰的进度指示器
-3. WHEN 需要用户交互 THEN 系统 SHALL 提供清晰、简洁的说明
-4. IF 首次尝试验证成功 THEN 系统 SHALL 最小化庆祝消息
-5. WHEN 显示错误消息时 THEN 系统 SHALL 使用通俗语言避免技术术语
-6. IF 可以进行后台验证 THEN 系统 SHALL 优先选择它而不是阻塞操作
-7. WHEN 流程完成时 THEN 系统 SHALL 提供清晰的下一步指示
+1. WHEN verifying permissions THEN system SHALL complete check within 3 seconds
+2. IF verification is in progress THEN system SHALL display clear progress indicator
+3. WHEN user interaction is needed THEN system SHALL provide clear, concise instructions
+4. IF first attempt verification succeeds THEN system SHALL minimize celebratory messaging
+5. WHEN displaying error messages THEN system SHALL use plain language avoiding technical jargon
+6. IF background verification is possible THEN system SHALL prefer it over blocking operations
+7. WHEN process completes THEN system SHALL provide clear next step guidance
 
-### 需求 5: Error Handling and Logging（错误处理和日志记录）
+### Requirement 5: Error Handling and Logging
 
-**用户故事:** 作为开发者，我希望在权限验证期间有全面的错误处理和日志记录，这样我可以在问题发生时进行故障排除。
+**User Story:** As a developer, I want comprehensive error handling and logging during permission verification, so I can troubleshoot when issues occur.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. WHEN 发生任何错误 THEN 系统 SHALL 记录带有 timestamp 和 context 的日志
-2. IF 关键错误阻止验证 THEN 系统 SHALL 优雅地降级功能
-3. WHEN 记录错误时 THEN 系统 SHALL 包含相关的系统状态信息
-4. IF 需要网络连接但不可用 THEN 系统 SHALL 具体检测并报告这种情况
-5. WHEN 向用户显示错误时 THEN 系统 SHALL 提供可操作的解决步骤
-6. IF 启用详细日志记录 THEN 系统 SHALL 记录所有验证步骤和结果
+1. WHEN any error occurs THEN system SHALL log with timestamp and context
+2. IF critical error prevents verification THEN system SHALL gracefully degrade functionality
+3. WHEN logging errors THEN system SHALL include relevant system state information
+4. IF network connection is needed but unavailable THEN system SHALL specifically detect and report this condition
+5. WHEN displaying errors to user THEN system SHALL provide actionable resolution steps
+6. IF verbose logging is enabled THEN system SHALL record all verification steps and results
 
-### 需求 6: Security Considerations（安全考虑）
+### Requirement 6: Security Considerations
 
-**用户故事:** 作为注重安全的用户，我希望权限验证是安全的且不会引入漏洞，这样我的系统能保持受保护状态。
+**User Story:** As a security-conscious user, I want permission verification to be secure and not introduce vulnerabilities, so my system can remain protected.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. WHEN 执行验证时 THEN 系统 SHALL NOT 在日志中暴露敏感信息
-2. IF 验证需要提升权限 THEN 系统 SHALL 明确请求这些权限
-3. WHEN 存储验证状态时 THEN 系统 SHALL 使用安全的存储机制
-4. IF 使用验证 tokens THEN 系统 SHALL 安全地处理它们并适当地使其过期
-5. WHEN 与 Claude Code 通信时 THEN 系统 SHALL 验证所有响应
-6. IF 检测到可疑活动 THEN 系统 SHALL 记录并可能阻止该操作
+1. WHEN performing verification THEN system SHALL NOT expose sensitive information in logs
+2. IF verification requires elevated permissions THEN system SHALL explicitly request those permissions
+3. WHEN storing verification state THEN system SHALL use secure storage mechanisms
+4. IF using verification tokens THEN system SHALL handle them securely and expire them appropriately
+5. WHEN communicating with Claude Code THEN system SHALL validate all responses
+6. IF suspicious activity is detected THEN system SHALL log and potentially block the operation

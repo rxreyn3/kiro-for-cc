@@ -19,9 +19,9 @@
             }
         }
 
-        /* VS Code 主题变量 */
+        /* VS Code theme variables */
         :root {
-            /* 使用 VS Code 提供的 CSS 变量 */
+            /* Use CSS variables provided by VS Code */
             --vscode-editor-background: var(--vscode-editor-background);
             --vscode-editor-foreground: var(--vscode-editor-foreground);
             --vscode-button-background: var(--vscode-button-background);
@@ -38,13 +38,13 @@
             --vscode-warningForeground: var(--vscode-warningForeground);
             --vscode-successForeground: var(--vscode-successForeground);
 
-            /* 自定义主题颜色 */
+            /* Custom theme colors */
             --terminal-green: #00ff00;
             --terminal-yellow: #ffff00;
             --terminal-red: #ff0000;
         }
 
-        /* 暗色主题样式 */
+        /* Dark theme styles */
         body {
             margin: 0;
             padding: 20px;
@@ -58,23 +58,23 @@
         }
 
         .vscode-dark body {
-            /* 暗色主题下保持终端风格 */
+            /* Maintain terminal style in dark theme */
             --terminal-green: #00ff00;
             --terminal-yellow: #ffff00;
             --terminal-red: #ff6b6b;
-            /* 柔和的红色，不那么刺眼 */
+            /* Soft red, less harsh on the eyes */
         }
 
         .vscode-light body {
-            /* 亮色主题下调整颜色 - 使用深色确保可读性 */
+            /* Adjust colors for light theme - use dark colors for readability */
             --terminal-green: #1565c0;
-            /* Blue 800 - 深蓝色替代绿色 */
+            /* Blue 800 - deep blue to replace green */
             --terminal-yellow: #3e2723;
-            /* Brown 900 - 极深棕色 */
+            /* Brown 900 - very dark brown */
             --terminal-red: #8d4e41;
-            /* 偏褐色的红 - 不那么刺眼 */
+            /* Brownish red - less harsh on the eyes */
 
-            /* 使用 WARNING 的淡黄色背景，更加柔和 */
+            /* Use WARNING's light yellow background, more gentle */
             background: #fff3cd;
         }
 
@@ -87,10 +87,10 @@
             position: relative;
         }
 
-        /* 浅色主题下的容器背景 */
+        /* Container background for light theme */
         .vscode-light .container {
             background: #fffef9;
-            /* 更浅的奶油色，与页面背景协调 */
+            /* Lighter cream color, coordinating with page background */
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
         }
 
@@ -104,10 +104,10 @@
             align-items: center;
         }
 
-        /* 浅色主题下终端头部使用深色 */
+        /* Use dark color for terminal header in light theme */
         .vscode-light .terminal-header {
             color: #424242;
-            /* 深灰色 */
+            /* Dark gray */
         }
 
         .terminal-title {
@@ -116,10 +116,10 @@
             font-weight: bold;
         }
 
-        /* 浅色主题下标题使用深色 */
+        /* Use dark color for title in light theme */
         .vscode-light .terminal-title {
             color: #424242;
-            /* 深灰色 */
+            /* Dark gray */
         }
 
         .terminal-title::before {
@@ -128,10 +128,10 @@
             margin-right: 5px;
         }
 
-        /* 浅色主题下美元符号使用蓝色 */
+        /* Use blue for dollar sign in light theme */
         .vscode-light .terminal-title::before {
             color: #1565c0;
-            /* 深蓝色 */
+            /* Deep blue */
         }
 
         .action-box {
@@ -142,7 +142,7 @@
             position: relative;
         }
 
-        /* 浅色主题下 action-box 透明背景 */
+        /* Transparent background for action-box in light theme */
         .vscode-light .action-box {
             background: transparent;
             border: none;
@@ -161,10 +161,10 @@
             color: var(--terminal-yellow);
         }
 
-        /* 浅色主题下 action-box 标题使用深色 */
+        /* Use dark color for action-box title in light theme */
         .vscode-light .action-box h3 {
             color: #424242;
-            /* 深灰色 */
+            /* Dark gray */
         }
 
         .action-box p {
@@ -173,10 +173,10 @@
             color: var(--terminal-green);
         }
 
-        /* 浅色主题下 action-box 文字使用深色 */
+        /* Use dark color for action-box text in light theme */
         .vscode-light .action-box p {
             color: #424242;
-            /* 深灰色，易于阅读 */
+            /* Dark gray, easy to read */
         }
 
         .arrow-text {
@@ -184,25 +184,25 @@
             margin: 15px 0;
             font-size: 14px;
             color: var(--terminal-green);
-            /* 改用绿色，对比度更好 */
+            /* Changed to green for better contrast */
         }
 
-        /* 浅色主题下 arrow-text 使用深色 */
+        /* Use dark color for arrow-text in light theme */
         .vscode-light .arrow-text {
             color: #616161;
-            /* 中深灰色 */
+            /* Medium-dark gray */
         }
 
-        /* 浅色主题下 arrow-text 光标也使用相同颜色 */
+        /* Use same color for arrow-text cursor in light theme */
         .vscode-light .arrow-text::after {
             color: #616161;
-            /* 与文字相同的中深灰色 */
+            /* Same medium-dark gray as text */
         }
 
         .arrow-text::after {
             content: '_';
             color: var(--terminal-green);
-            /* 光标也改为绿色 */
+            /* Cursor also changed to green */
             animation: blink 1s infinite;
         }
 
@@ -230,13 +230,13 @@
             background: var(--vscode-input-background);
             border: 3px solid var(--terminal-red);
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
-            /* 减弱阴影 */
+            /* Reduced shadow */
         }
 
-        /* 浅色主题下使用偏红的褐色边框 */
+        /* Use reddish-brown border in light theme */
         .vscode-light .image-container {
             border: 3px solid #a1665e;
-            /* 偏红的褐色 */
+            /* Reddish brown */
             box-shadow: 0 0 20px rgba(161, 102, 94, 0.3);
         }
 
@@ -253,7 +253,7 @@
             letter-spacing: 2px;
         }
 
-        /* 浅色主题下确保 ATTENTION 标签可见 */
+        /* Ensure ATTENTION label is visible in light theme */
         .vscode-light .image-container::before {
             background: white;
             border: 1px solid var(--terminal-red);
@@ -262,7 +262,7 @@
         .terminal-content {
             font-family: var(--vscode-editor-font-family, 'SF Mono', Monaco, Consolas, 'Courier New', monospace);
             font-size: 12px;
-            /* 调小终端内容字体 */
+            /* Reduce terminal content font size */
             line-height: 1.5;
             padding: 15px;
             background: var(--vscode-terminal-background, var(--vscode-editor-background));
@@ -277,13 +277,13 @@
             text-align: center;
             letter-spacing: 1px;
             font-size: 13px;
-            /* 调小标题字体 */
+            /* Reduce title font size */
         }
 
-        /* 浅色主题下加强警告文字背景 */
+        /* Enhance warning text background in light theme */
         .vscode-light .warning-banner {
             color: #856404;
-            /* 深棕色文字 */
+            /* Dark brown text */
             background: #fff3cd;
             padding: 5px;
             border: 1px solid #ffeeba;
@@ -297,7 +297,7 @@
             margin: 8px 0;
             line-height: 1.5;
             font-size: 12px;
-            /* 调小警告文字 */
+            /* Reduce warning text size */
         }
 
         .warning-text .link {
@@ -309,7 +309,7 @@
             margin-top: 12px;
             font-family: var(--vscode-editor-font-family, monospace);
             font-size: 12px;
-            /* 调小选项字体 */
+            /* Reduce option font size */
         }
 
         .permission-option {
@@ -323,7 +323,7 @@
             font-weight: bold;
         }
 
-        /* 亮色主题适配 */
+        /* Light theme adaptation */
         .vscode-light .terminal-content {
             background: #f5f5f5;
             color: #333;
@@ -335,7 +335,7 @@
             color: white;
         }
 
-        /* 浅色主题下确保所有黄色文字可读 */
+        /* Ensure all yellow text is readable in light theme */
         .vscode-light .action-box h3::before,
         .vscode-light .option::before,
         .vscode-light .option::after,
@@ -450,10 +450,10 @@
             transition: all 0.1s;
         }
 
-        /* 浅色主题下 issue 链接颜色 */
+        /* Issue link color in light theme */
         .vscode-light .issue-link {
             color: #666666;
-            /* 中灰色 */
+            /* Medium gray */
         }
 
         .issue-link:hover {
@@ -461,16 +461,16 @@
             text-decoration: underline;
         }
 
-        /* 终端风格保持 - 已在 :root 中通过 CSS 变量定义 */
+        /* Terminal style maintained - defined through CSS variables in :root */
 
-        /* 高对比度主题支持 */
+        /* High contrast theme support */
         .vscode-high-contrast {
             --terminal-green: var(--vscode-terminal-ansiGreen);
             --terminal-yellow: var(--vscode-terminal-ansiYellow);
             --terminal-red: var(--vscode-terminal-ansiRed);
         }
 
-        /* 非交互模式提示样式 */
+        /* Non-interactive mode hint styles */
         .note-section {
             margin-top: 20px;
             padding: 20px;
@@ -478,7 +478,7 @@
             border: 1px solid var(--vscode-editorInfo-border, var(--vscode-input-border));
             border-radius: 4px;
             font-size: 15px;
-            /* 增大字体 */
+            /* Increase font size */
         }
 
         .note-title {
@@ -486,7 +486,7 @@
             font-weight: bold;
             margin: 0 0 10px 0;
             font-size: 16px;
-            /* 增大标题字体 */
+            /* Increase title font size */
         }
 
         .note-text {
@@ -494,7 +494,7 @@
             line-height: 1.6;
             margin: 0;
             font-size: 15px;
-            /* 增大正文字体 */
+            /* Increase body text font size */
         }
 
         .note-text code {
@@ -505,7 +505,7 @@
             font-size: 0.9em;
         }
 
-        /* 浅色主题下的代码块样式 */
+        /* Code block styles for light theme */
         .vscode-light .note-text code {
             background: rgba(0, 0, 0, 0.06);
         }

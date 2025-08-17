@@ -1,12 +1,12 @@
-# 设计文档
+# Design Document
 
-## 概述
+## Overview
 
-本设计文档描述了如何通过引入多个专门的 Claude Code subagent 来增强现有的 spec workflow 流程。该设计将创建三个核心 subagent（spec-requirements、spec-design、spec-tasks）以及相应的 VSCode 插件集成，实现并行处理和专业化管理。
+This design document describes how to enhance the existing spec workflow process by introducing multiple specialized Claude Code subagents. The design will create three core subagents (spec-requirements, spec-design, spec-tasks) along with corresponding VSCode plugin integration to achieve parallel processing and specialized management.
 
-## 架构
+## Architecture
 
-### 整体架构
+### Overall Architecture
 
 ```mermaid
 graph TB
@@ -58,30 +58,30 @@ graph TB
     CC -->|auto invoke based on description| OtherAgents
 ```
 
-### 组件间交互
+### Component Interactions
 
-1. **插件启动**：每次启动时检查 `.claude/agents/kfc/` 目录，如果内置 agents 不存在则复制
-2. **Workflow 初始化**：spec-system-prompt-loader 加载 `.claude/system-prompts/spec-workflow-starter.md`，将调度策略和 spec workflow system prompt 提供给主线程
-3. **Agent 管理**：Agent Manager 负责初始化和管理 agents，但不负责调用
-4. **Subagent 调用**：Claude Code 主线程根据 system prompt 中的调度策略和 agent 描述自动识别并调用相应的 subagent
-5. **UI 展示**：Agents Explorer 显示项目级和用户级 agents，允许用户查看和编辑
+1. **Plugin Startup**: Check `.claude/agents/kfc/` directory on each startup, copy built-in agents if they don't exist
+2. **Workflow Initialization**: spec-system-prompt-loader loads `.claude/system-prompts/spec-workflow-starter.md`, providing scheduling strategies and spec workflow system prompt to the main thread
+3. **Agent Management**: Agent Manager is responsible for initializing and managing agents, but not for invoking them
+4. **Subagent Invocation**: Claude Code main thread automatically identifies and invokes corresponding subagents based on scheduling strategies and agent descriptions in the system prompt
+5. **UI Display**: Agents Explorer displays project-level and user-level agents, allowing users to view and edit
 
-## 组件和接口
+## Components and Interfaces
 
 ### 1. Agent Manager
 
 ```typescript
 interface AgentManager {
-  // 初始化内置 agents (启动时复制到 .claude/agents/kfc/)
+  // Initialize built-in agents (copy to .claude/agents/kfc/ on startup)
   initializeBuiltInAgents(): Promise<void>;
   
-  // 获取 agent 列表
+  // Get agent list
   getAgentList(type: 'project' | 'user' | 'all'): Promise<AgentInfo[]>;
   
-  // 检查 agent 是否存在
+  // Check if agent exists
   checkAgentExists(agentName: string, location: 'project' | 'user'): boolean;
   
-  // 获取 agent 文件路径
+  // Get agent file path
   getAgentPath(agentName: string): string | null;
 }
 
@@ -103,13 +103,13 @@ class AgentsExplorerProvider extends vscode.TreeDataProvider<AgentItem> {
     private agentManager: AgentManager
   );
   
-  // 获取 agent 树形结构
+  // Get agent tree structure
   getChildren(element?: AgentItem): Promise<AgentItem[]>;
   
-  // 刷新视图
+  // Refresh view
   refresh(): void;
   
-  // 打开 agent 文件
+  // Open agent file
   openAgentFile(agentPath: string): Promise<void>;
 }
 
@@ -122,7 +122,7 @@ class AgentItem extends vscode.TreeItem {
 }
 ```
 
-### 3. 内置 Agents 初始化流程
+### 3. Built-in Agents Initialization Process
 
 ```typescript
 class AgentInitializer {
@@ -142,7 +142,7 @@ class AgentInitializer {
     for (const agentName of this.BUILT_IN_AGENTS) {
       const targetPath = path.join(targetDir, `${agentName}.md`);
       
-      // 如果文件不存在，则复制
+      // Copy if file doesn't exist
       if (!fs.existsSync(targetPath)) {
         await this.copyBuiltInAgent(agentName, targetPath);
       }
@@ -156,26 +156,26 @@ class AgentInitializer {
 }
 ```
 
-### 4. 内置 Spec Subagents
+### 4. Built-in Spec Subagents
 
-内置的 spec subagents 已经过精心设计和测试，包括：
+The built-in spec subagents have been carefully designed and tested, including:
 
-**核心 Spec Agents:**
-- **spec-requirements**: 专门负责创建和优化 EARS 格式的需求文档
-- **spec-design**: 基于需求文档创建详细的技术设计方案
-- **spec-tasks**: 将设计转换为可执行的实施任务列表
+**Core Spec Agents:**
+- **spec-requirements**: Specialized in creating and optimizing EARS format requirement documents
+- **spec-design**: Creates detailed technical design solutions based on requirement documents
+- **spec-tasks**: Converts designs into executable implementation task lists
 
-**辅助 Agents:**
-- **spec-system-prompt-loader**: 加载 `.claude/system-prompts/spec-workflow-starter.md`，为主线程提供 workflow 和调度策略
-- **spec-judge**: 评审 spec 文档质量
-- **spec-impl**: 执行具体的编码实施任务
-- **spec-test**: 创建测试文档和测试代码
+**Supporting Agents:**
+- **spec-system-prompt-loader**: Loads `.claude/system-prompts/spec-workflow-starter.md`, providing workflow and scheduling strategies to the main thread
+- **spec-judge**: Reviews spec document quality
+- **spec-impl**: Executes specific coding implementation tasks
+- **spec-test**: Creates test documents and test code
 
-这些 agents 将在插件初始化时自动复制到项目的 `.claude/agents/kfc/` 目录。spec-system-prompt-loader 的加载使得主线程能够理解整个 spec workflow 并根据 agent 描述自动调度。
+These agents will be automatically copied to the project's `.claude/agents/kfc/` directory during plugin initialization. The loading of spec-system-prompt-loader enables the main thread to understand the entire spec workflow and automatically schedule based on agent descriptions.
 
-## 数据模型
+## Data Models
 
-### Agent 配置文件结构
+### Agent Configuration File Structure
 
 ```typescript
 interface AgentConfig {
@@ -189,59 +189,59 @@ interface AgentConfig {
 }
 ```
 
-### Agent 存储位置
+### Agent Storage Locations
 
-- **项目级 agents**: `.claude/agents/kfc/*.md` (内置 agents 复制到此处)
-- **用户级 agents**: `~/.claude/agents/*.md`
-- **内置资源**: 扩展资源目录 `resources/agents/*.md`
+- **Project-level agents**: `.claude/agents/kfc/*.md` (built-in agents copied here)
+- **User-level agents**: `~/.claude/agents/*.md`
+- **Built-in resources**: Extension resource directory `resources/agents/*.md`
 
-## 错误处理
+## Error Handling
 
-### 1. Agent 初始化错误
+### 1. Agent Initialization Errors
 
-- **场景**：内置 agent 复制失败
-- **处理**：记录错误到输出通道，跳过该文件，继续处理其他 agent
+- **Scenario**: Built-in agent copy failure
+- **Handling**: Log error to output channel, skip the file, continue processing other agents
 
-### 2. Agent 文件编辑确认
+### 2. Agent File Edit Confirmation
 
-- **场景**：用户通过 Agents Explorer 修改 agent 文件
-- **处理**：
-  - 在屏幕中央显示确认弹框
-  - 确认后保存更改
-  - 取消则恢复原内容
+- **Scenario**: User modifies agent file through Agents Explorer
+- **Handling**:
+  - Display confirmation dialog in screen center
+  - Save changes after confirmation
+  - Restore original content if cancelled
 
-### 3. Agent 文件缺失
+### 3. Agent File Missing
 
-- **场景**：用户删除了项目中的内置 agent 文件
-- **处理**：
-  - 下次启动时自动恢复
-  - 提供手动恢复选项
+- **Scenario**: User deletes built-in agent file from project
+- **Handling**:
+  - Automatically restore on next startup
+  - Provide manual restore option
 
-## 测试策略
+## Testing Strategy
 
-### 1. 单元测试
+### 1. Unit Testing
 
-- **AgentManager**: 测试 agent 初始化、列表获取、文件操作
-- **AgentsExplorerProvider**: 测试树形结构生成、事件处理
-- **Subagent 协调**: 测试参数传递、结果处理
+- **AgentManager**: Test agent initialization, list retrieval, file operations
+- **AgentsExplorerProvider**: Test tree structure generation, event handling
+- **Subagent Coordination**: Test parameter passing, result handling
 
-### 2. 集成测试
+### 2. Integration Testing
 
-- **端到端工作流**: 测试完整的 spec 创建流程
-- **并行执行**: 测试多个 subagent 同时工作
-- **错误恢复**: 测试各种错误场景的处理
+- **End-to-end Workflow**: Test complete spec creation process
+- **Parallel Execution**: Test multiple subagents working simultaneously
+- **Error Recovery**: Test handling of various error scenarios
 
-### 3. 用户验收测试
+### 3. User Acceptance Testing
 
-- **UI 交互**: 验证 Agents Explorer 的用户体验
-- **性能测试**: 确保 subagent 调用不会阻塞 UI
-- **兼容性测试**: 验证与现有 spec workflow 的兼容性
+- **UI Interaction**: Verify Agents Explorer user experience
+- **Performance Testing**: Ensure subagent calls don't block UI
+- **Compatibility Testing**: Verify compatibility with existing spec workflow
 
-## 实施注意事项
+## Implementation Considerations
 
-1. **向后兼容**：新的 subagent 系统应与现有的 spec workflow 兼容
-2. **性能优化**：使用缓存机制减少文件系统访问
-3. **用户体验**：提供清晰的进度反馈和错误提示
-4. **安全性**：限制 subagent 的工具权限，防止误操作
-5. **可扩展性**：设计应支持未来添加更多类型的 subagent
-6. **双入口支持**：Spec Explorer 应同时支持原有流程和新的 subagent 流程入口
+1. **Backward Compatibility**: New subagent system should be compatible with existing spec workflow
+2. **Performance Optimization**: Use caching mechanisms to reduce file system access
+3. **User Experience**: Provide clear progress feedback and error prompts
+4. **Security**: Limit subagent tool permissions to prevent misoperations
+5. **Extensibility**: Design should support adding more types of subagents in the future
+6. **Dual Entry Support**: Spec Explorer should support both original process and new subagent process entry points

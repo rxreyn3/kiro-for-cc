@@ -1,33 +1,33 @@
-# 设计文档
+# Design Document
 
-## 概述
+## Overview
 
-本设计文档描述了 Claude Code 权限验证系统的增强方案。现有系统依赖用户在 WebView 中点击确认，但没有验证权限是否真正生效。新系统将通过检查 `~/.claude.json` 配置文件中的 `bypassPermissionsModeAccepted` 字段来进行双向验证，确保权限真正被授予。
+This design document describes the enhancement plan for the Claude Code permission verification system. The existing system relies on user confirmation clicks in WebView but doesn't verify if permissions are actually granted. The new system will perform bidirectional verification by checking the `bypassPermissionsModeAccepted` field in the `~/.claude.json` configuration file to ensure permissions are truly granted.
 
-## 现有系统分析
+## Existing System Analysis
 
-### 当前实现
+### Current Implementation
 
-- **权限状态存储**: 使用 `context.globalState` 存储用户声明的状态
-- **初始化流程**:
-  1. 扩展启动时检查 globalState
-  2. 如果没有权限记录，创建终端运行 `claude --permission-mode bypassPermissions`
-  3. 显示 PermissionWebview 引导用户
-  4. 用户点击"我已授予权限"后更新 globalState（但不验证实际状态）
+- **Permission State Storage**: Uses `context.globalState` to store user-declared status
+- **Initialization Flow**:
+  1. Check globalState when extension starts
+  2. If no permission record exists, create terminal to run `claude --permission-mode bypassPermissions`
+  3. Display PermissionWebview to guide user
+  4. Update globalState after user clicks "I have granted permissions" (but doesn't verify actual state)
 
-### 存在的问题
+### Existing Problems
 
-1. 依赖用户诚实点击，没有实际验证
-2. 无法感知权限被撤销的情况
-3. 缺少错误处理和重试机制
+1. Relies on honest user clicks without actual verification
+2. Cannot detect when permissions are revoked
+3. Lacks error handling and retry mechanisms
 
-## 增强架构
+## Enhanced Architecture
 
-### 系统架构图
+### System Architecture Diagram
 
 ```mermaid
 graph TB
-    %% 组件定义
+    %% Component definitions
     A[Extension Entry]
     B[ClaudeCodeProvider]
     H[~/.claude.json]
@@ -39,7 +39,7 @@ graph TB
         F[ConfigReader]
     end
     
-    %% 主要调用关系
+    %% Main call relationships
     A --> D
     D --> B
     D --> C
@@ -47,67 +47,67 @@ graph TB
     E --> F
     F --> H
     
-    %% 事件和回调
-    C -.->|用户操作| D
-    F -.->|文件变化事件| E
-    E -.->|权限变更事件| D
-    A -.->|重试| A
+    %% Events and callbacks
+    C -.->|User actions| D
+    F -.->|File change events| E
+    E -.->|Permission change events| D
+    A -.->|Retry| A
     
-    %% 样式定义
+    %% Style definitions
     classDef existing fill:#bbdefb,stroke:#1976d2,stroke-width:2px
     classDef new fill:#ffecb3,stroke:#f57c00,stroke-width:2px
     classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
     
-    %% 应用样式
+    %% Apply styles
     class A,B existing
     class D,C,E,F new
     class H external
 ```
 
-### 数据流图
+### Data Flow Diagram
 
 ```mermaid
 graph LR
-    subgraph "数据源"
+    subgraph "Data Source"
         JSON[~/.claude.json]
     end
     
-    subgraph "数据读取"
+    subgraph "Data Reading"
         CR[ConfigReader]
-        JSON -->|读取| CR
-        CR -->|监听变化| JSON
+        JSON -->|Read| CR
+        CR -->|Watch changes| JSON
     end
     
-    subgraph "缓存层"
+    subgraph "Cache Layer"
         PC[PermissionCache]
-        CR -->|权限状态| PC
-        PC -->|缓存值| PC
+        CR -->|Permission status| PC
+        PC -->|Cached value| PC
     end
     
-    subgraph "业务层"
+    subgraph "Business Layer"
         PM[PermissionManager]
-        PC -->|权限状态| PM
-        PC -.->|权限变更事件| PM
+        PC -->|Permission status| PM
+        PC -.->|Permission change events| PM
     end
     
-    subgraph "用户交互"
+    subgraph "User Interaction"
         PW[PermissionWebview]
         T[Terminal]
-        PM -->|控制| PW
-        PM -->|控制| T
-        PW -->|用户操作| PM
+        PM -->|Control| PW
+        PM -->|Control| T
+        PW -->|User actions| PM
     end
     
-    subgraph "入口"
+    subgraph "Entry Point"
         CP[ClaudeCodeProvider]
-        PM -->|结果| CP
+        PM -->|Results| CP
     end
     
-    %% 数据写入路径
+    %% Data write path
     PM -->|grantPermission| CR
-    CR -->|写入| JSON
+    CR -->|Write| JSON
     
-    %% 样式
+    %% Styles
     classDef data fill:#ffecb3,stroke:#f57c00
     classDef cache fill:#f3e5f5,stroke:#7b1fa2
     classDef business fill:#e8f5e9,stroke:#2e7d32
@@ -119,17 +119,17 @@ graph LR
     class PW,T,CP ui
 ```
 
-### 核心组件设计
+### Core Component Design
 
-#### 1. PermissionManager（权限管理器）
+#### 1. PermissionManager (Permission Manager)
 
-- **职责**: Permission System 的中心协调器，管理整个权限流程
-- **位置**: `src/features/permission/permissionManager.ts`
-- **关键功能**:
-  - 扩展启动时检查权限状态
-  - 协调终端创建和 WebView 显示
-  - 处理用户操作结果
-  - 管理资源清理
+- **Responsibilities**: Central coordinator for the Permission System, managing the entire permission flow
+- **Location**: `src/features/permission/permissionManager.ts`
+- **Key Functions**:
+  - Check permission status when extension starts
+  - Coordinate terminal creation and WebView display
+  - Handle user operation results
+  - Manage resource cleanup
 
 ```typescript
 class PermissionManager {
@@ -145,7 +145,7 @@ class PermissionManager {
     this.configReader = new ConfigReader(outputChannel);
     this.cache = new PermissionCache(this.configReader, outputChannel);
     
-    // 监听权限变更事件
+    // Listen to permission change events
     this.cache.event((hasPermission) => {
       if (hasPermission && this.permissionWebview) {
         this.permissionWebview.dispose();
@@ -154,16 +154,16 @@ class PermissionManager {
     });
   }
   
-  // 扩展启动时调用，初始化权限系统
+  // Called when extension starts, initialize permission system
   async initializePermissions(): Promise<boolean>;
   
-  // 运行时检查权限（使用缓存）
+  // Runtime permission check (using cache)
   async checkPermission(): Promise<boolean>;
   
-  // WebView 点击"我已授予权限"时调用
+  // Called when WebView "I have granted permissions" is clicked
   async grantPermission(): Promise<boolean>;
   
-  // 显示权限设置流程（扩展启动和运行时都可能调用）
+  // Show permission setup flow (can be called during extension startup and runtime)
   async showPermissionSetup(): Promise<boolean>;
   
   startMonitoring(): void;
@@ -171,14 +171,14 @@ class PermissionManager {
 }
 ```
 
-#### 2. PermissionCache（权限缓存）
+#### 2. PermissionCache (Permission Cache)
 
-- **职责**: 管理权限状态的内存缓存，优化性能
-- **位置**: `src/features/permission/permissionCache.ts`
-- **关键功能**:
-  - 缓存权限状态，避免频繁读文件
-  - 发送权限变更事件
-  - 缓存永不过期，除非文件变化
+- **Responsibilities**: Manage in-memory cache of permission status, optimize performance
+- **Location**: `src/features/permission/permissionCache.ts`
+- **Key Functions**:
+  - Cache permission status to avoid frequent file reads
+  - Send permission change events
+  - Cache never expires unless file changes
 
 ```typescript
 interface IPermissionCache {
@@ -213,7 +213,7 @@ class PermissionCache extends vscode.EventEmitter<boolean> implements IPermissio
     const oldValue = this.cache;
     this.cache = await this.configReader.getBypassPermissionStatus();
     
-    // 权限从 false 变为 true 时触发事件
+    // Trigger event when permission changes from false to true
     if (oldValue === false && this.cache === true) {
       this.fire(true);
     }
@@ -223,14 +223,14 @@ class PermissionCache extends vscode.EventEmitter<boolean> implements IPermissio
 }
 ```
 
-#### 3. ConfigReader（配置读取器）
+#### 3. ConfigReader (Configuration Reader)
 
-- **职责**: 处理 `~/.claude.json` 文件的所有操作
-- **位置**: `src/features/permission/configReader.ts`
-- **关键功能**:
-  - 读取配置文件
-  - 写入权限设置
-  - 监听文件变化
+- **Responsibilities**: Handle all operations on `~/.claude.json` file
+- **Location**: `src/features/permission/configReader.ts`
+- **Key Functions**:
+  - Read configuration file
+  - Write permission settings
+  - Monitor file changes
 
 ```typescript
 class ConfigReader {
@@ -258,15 +258,15 @@ class ConfigReader {
 }
 ```
 
-#### 4. PermissionWebview（权限设置界面）
+#### 4. PermissionWebview (Permission Setup Interface)
 
-- **职责**: 提供用户界面，收集用户操作
-- **位置**: `src/webview/permissionWebview.ts`（现有组件）
-- **改动说明**: 仅需微调，主要是增加 PermissionManager 参数
-- **增强功能**:
-  - 接收 PermissionManager 实例
-  - 通过 Manager 处理用户操作
-  - 不直接操作文件或状态
+- **Responsibilities**: Provide user interface, collect user operations
+- **Location**: `src/webview/permissionWebview.ts` (existing component)
+- **Change Description**: Only minor adjustments needed, mainly adding PermissionManager parameter
+- **Enhanced Features**:
+  - Receive PermissionManager instance
+  - Handle user operations through Manager
+  - Don't directly manipulate files or state
 
 ```typescript
 export class PermissionWebviewProvider {
@@ -274,57 +274,57 @@ export class PermissionWebviewProvider {
   
   public static createOrShow(
     context: vscode.ExtensionContext,
-    permissionManager?: PermissionManager  // 新增参数
+    permissionManager?: PermissionManager  // New parameter
   ): Promise<boolean> {
-    // 现有代码基本保持不变
-    // 仅在处理 'accept' 消息时调用 permissionManager.grantPermission()
+    // Existing code remains mostly unchanged
+    // Only call permissionManager.grantPermission() when handling 'accept' messages
   }
 }
 ```
 
-#### 5. 集成方案说明
+#### 5. Integration Plan Description
 
-根据现有代码，重试机制已经在 Extension Entry 层实现，通过简单的递归调用实现。新的 Permission System 将保持这种简单的重试方式：
+Based on existing code, the retry mechanism is already implemented at the Extension Entry layer through simple recursive calls. The new Permission System will maintain this simple retry approach:
 
 ```typescript
-// Extension Entry 中的重试逻辑
+// Retry logic in Extension Entry
 async function initializeExtension(context: vscode.ExtensionContext) {
   const permissionManager = new PermissionManager(context, outputChannel);
   
   const hasPermission = await permissionManager.initializePermissions();
   
   if (!hasPermission) {
-    // 显示警告并提供重试选项
+    // Show warning and provide retry option
     vscode.window.showWarningMessage(
       'Claude Code permissions not granted. Some features may not work properly.',
       'Try Again'
     ).then(async selection => {
       if (selection === 'Try Again') {
-        // 直接调用权限设置流程，而不是递归
+        // Directly call permission setup flow instead of recursion
         await permissionManager.showPermissionSetup();
       }
     });
   }
   
-  // 保存 manager 供其他地方使用
+  // Save manager for use elsewhere
   context.workspaceState.update('permissionManager', permissionManager);
 }
 ```
 
-这种设计保持了现有的简单性，无需额外的 RetryHandler 组件。
+This design maintains the existing simplicity without needing additional RetryHandler components.
 
-#### 6. ClaudeCodeProvider（增强现有组件）
+#### 6. ClaudeCodeProvider (Enhanced Existing Component)
 
-- **职责**: 提供终端创建服务
-- **位置**: `src/providers/claudeCodeProvider.ts`（现有组件）
-- **改动说明**: 仅需添加一个静态方法，现有代码保持不变
-- **新增方法**:
+- **Responsibilities**: Provide terminal creation services
+- **Location**: `src/providers/claudeCodeProvider.ts` (existing component)
+- **Change Description**: Only need to add one static method, existing code remains unchanged
+- **New Method**:
 
 ```typescript
 class ClaudeCodeProvider {
-  // 现有代码保持不变...
+  // Existing code remains unchanged...
   
-  // 仅新增此方法
+  // Only add this method
   static createPermissionTerminal(): vscode.Terminal {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     const terminal = vscode.window.createTerminal({
@@ -344,29 +344,29 @@ class ClaudeCodeProvider {
 }
 ```
 
-### 数据模型
+### Data Models
 
 ```typescript
-// Claude 配置文件结构
+// Claude configuration file structure
 interface ClaudeConfig {
   bypassPermissionsModeAccepted?: boolean;
-  // 其他配置项...
+  // Other configuration items...
 }
 
-// WebView 消息
+// WebView messages
 interface PermissionWebviewMessage {
   command: 'accept' | 'cancel';
   data?: any;
 }
 
-// WebView 状态更新消息
+// WebView status update messages
 interface WebviewStatusMessage {
   command: 'updateStatus';
   status: 'verifying' | 'failed' | 'success';
   message?: string;
 }
 
-// 文件变化事件数据
+// File change event data
 interface FileChangeEvent {
   configPath: string;
   previousMtime: Date;
@@ -374,24 +374,24 @@ interface FileChangeEvent {
 }
 ```
 
-## 业务流程
+## Business Process
 
-### 1. 扩展启动时的权限检查
+### 1. Permission Check During Extension Startup
 
 ```mermaid
 graph TD
-    A[Extension 启动] --> B[创建 PermissionManager]
+    A[Extension Startup] --> B[Create PermissionManager]
     B --> C[permissionManager.initializePermissions]
     C --> D[cache.refreshAndGet]
     D --> E[configReader.getBypassPermissionStatus]
-    E --> F{有权限?}
-    F -->|是| G[permissionManager.startMonitoring]
-    F -->|否| H[permissionManager.showPermissionSetup]
-    G --> I[正常使用]
-    H --> J[进入权限设置流程]
+    E --> F{Has Permission?}
+    F -->|Yes| G[permissionManager.startMonitoring]
+    F -->|No| H[permissionManager.showPermissionSetup]
+    G --> I[Normal Usage]
+    H --> J[Enter Permission Setup Flow]
 ```
 
-### 2. 权限设置流程
+### 2. Permission Setup Flow
 
 ```mermaid
 graph TD
@@ -399,100 +399,100 @@ graph TD
     B --> C[terminal.show]
     C --> D[terminal.sendText: claude --permission-mode bypassPermissions]
     A --> E[permissionWebview.createOrShow]
-    E --> F[显示权限设置界面]
-    F --> G{用户操作}
+    E --> F[Show permission setup interface]
+    F --> G{User operation}
     
-    %% 路径1: 终端操作
-    G -->|终端选择 Yes| H[Claude CLI 更新文件]
-    H --> I[configReader.watchFile 检测变化]
+    %% Path 1: Terminal operation
+    G -->|Terminal selects Yes| H[Claude CLI updates file]
+    H --> I[configReader.watchFile detects changes]
     I --> J[cache.refresh]
-    J --> K[cache.event 触发权限变更]
-    K --> L[permissionManager 监听到事件]
+    J --> K[cache.event triggers permission change]
+    K --> L[permissionManager listens to event]
     L --> M[webview.dispose]
     L --> N[terminal.dispose]
     
-    %% 路径2: WebView 操作
-    G -->|点击 我已授予权限| O[permissionManager.grantPermission]
+    %% Path 2: WebView operation
+    G -->|Click "I have granted permissions"| O[permissionManager.grantPermission]
     O --> P[configReader.setBypassPermission]
     P --> Q[cache.refreshAndGet]
     Q --> R[webview.dispose]
     Q --> S[terminal.dispose]
     
-    %% 路径3: 用户取消
-    G -->|取消| T[webview 返回 false]
+    %% Path 3: User cancellation
+    G -->|Cancel| T[webview returns false]
     T --> U[terminal.dispose]
-    U --> V[显示重试选项]
+    U --> V[Show retry option]
 ```
 
-### 3. 执行 Claude 命令时的权限检查
+### 3. Permission Check During Claude Command Execution
 
 ```mermaid
 graph TD
-    A[用户触发 Claude 命令] --> B[claudeCodeProvider.invokeClaudeSplitView/Headless]
+    A[User triggers Claude command] --> B[claudeCodeProvider.invokeClaudeSplitView/Headless]
     B --> C[permissionManager.checkPermission]
-    C --> D{有权限?}
-    D -->|是| E[创建工作终端]
-    E --> F[执行用户的 Claude 命令]
-    D -->|否| G[permissionManager.showPermissionSetup]
-    G --> H[进入权限设置流程]
-    H --> I[权限设置完成后重试]
+    C --> D{Has permission?}
+    D -->|Yes| E[Create working terminal]
+    E --> F[Execute user's Claude command]
+    D -->|No| G[permissionManager.showPermissionSetup]
+    G --> H[Enter permission setup flow]
+    H --> I[Retry after permission setup completes]
 ```
 
-### 4. 文件监听机制
+### 4. File Monitoring Mechanism
 
 ```mermaid
 graph TD
-    A[configReader.watchFile 监听 ~/.claude.json] --> B[检测到文件变化]
-    B --> C[触发 callback]
+    A[configReader.watchFile monitors ~/.claude.json] --> B[Detect file changes]
+    B --> C[Trigger callback]
     C --> D[cache.refreshAndGet]
-    D --> E{权限从 false 变为 true?}
-    E -->|是| F[cache.fire 触发事件]
-    F --> G[permissionManager 接收事件]
-    G --> H[自动关闭 WebView 和终端]
-    E -->|否| I[仅更新缓存]
+    D --> E{Permission changed from false to true?}
+    E -->|Yes| F[cache.fire triggers event]
+    F --> G[permissionManager receives event]
+    G --> H[Auto-close WebView and terminal]
+    E -->|No| I[Update cache only]
 ```
 
-### 5. 重试流程
+### 5. Retry Flow
 
 ```mermaid
 graph TD
-    A{触发重试的条件} 
-    A -->|扩展启动时无权限| B[initializePermissions 返回 false]
-    A -->|用户取消 WebView| C[showPermissionSetup 返回 false]
-    A -->|权限设置失败| D[grantPermission 失败]
+    A{Retry trigger conditions} 
+    A -->|No permission at extension startup| B[initializePermissions returns false]
+    A -->|User cancels WebView| C[showPermissionSetup returns false]
+    A -->|Permission setup fails| D[grantPermission fails]
     
-    B --> E[Extension Entry 显示警告]
+    B --> E[Extension Entry shows warning]
     C --> E
     D --> E
     
     E --> F[vscode.window.showWarningMessage]
-    F --> G{用户选择}
-    G -->|Try Again| H[调用 manager.showPermissionSetup]
-    G -->|关闭| I[结束，扩展功能受限]
-    H --> J[重新进入权限设置流程]
+    F --> G{User choice}
+    G -->|Try Again| H[Call manager.showPermissionSetup]
+    G -->|Close| I[End, extension functionality limited]
+    H --> J[Re-enter permission setup flow]
 ```
 
-**触发重试的具体场景**：
+**Specific retry scenarios**:
 
-1. **扩展启动时检测到无权限**
-   - `initializePermissions()` 返回 false
-   - 用户在权限设置流程中取消
+1. **No permission detected at extension startup**
+   - `initializePermissions()` returns false
+   - User cancels during permission setup flow
 
-2. **用户在 WebView 中点击取消**
-   - `showPermissionSetup()` 返回 false
-   - 用户关闭了权限设置窗口
+2. **User clicks cancel in WebView**
+   - `showPermissionSetup()` returns false
+   - User closes the permission setup window
 
-3. **权限设置失败**
-   - 用户点击"我已授予权限"但验证失败
-   - 文件写入失败等异常情况
+3. **Permission setup fails**
+   - User clicks "I have granted permissions" but verification fails
+   - File write failures or other exceptional situations
 
-4. **不会触发重试的情况**
-   - 运行时权限检查失败（`checkPermission()` 返回 false）
-   - 这种情况会直接调用 `showPermissionSetup()`，不走重试流程
+4. **Scenarios that won't trigger retry**
+   - Runtime permission check failure (`checkPermission()` returns false)
+   - This case directly calls `showPermissionSetup()`, bypassing retry flow
 
-## 集成方案
+## Integration Plan
 
-### 1. 简化 ClaudeCodeProvider
+### 1. Simplified ClaudeCodeProvider
 
 ```typescript
 export class ClaudeCodeProvider {
@@ -502,14 +502,14 @@ export class ClaudeCodeProvider {
     context: vscode.ExtensionContext, 
     outputChannel?: vscode.OutputChannel
   ): Promise<void> {
-    // 创建权限管理器
+    // Create permission manager
     this.permissionManager = new PermissionManager(context, outputChannel);
     
-    // 直接检查实际文件状态，不依赖 globalState
+    // Check actual file status directly, not relying on globalState
     const hasValidPermission = await this.permissionManager.initializePermissions();
     
     if (!hasValidPermission) {
-      // 调用 PermissionManager 处理权限设置
+      // Call PermissionManager to handle permission setup
       const userAccepted = await this.permissionManager.showPermissionSetup();
       
       if (userAccepted) {
@@ -525,7 +525,7 @@ export class ClaudeCodeProvider {
         );
         
         if (retry === 'Try Again') {
-          // 递归调用重新开始
+          // Recursive call to restart
           await ClaudeCodeProvider.initializePermissions(context, outputChannel);
         }
       }
@@ -535,24 +535,24 @@ export class ClaudeCodeProvider {
       );
     }
     
-    // 启动文件监听
+    // Start file monitoring
     this.permissionManager.startMonitoring();
   }
   
   async invokeClaudeSplitView(prompt: string, options?: InvokeOptions) {
-    // 检查权限（使用缓存）
+    // Check permission (using cache)
     if (!await this.permissionManager.checkPermission()) {
       const granted = await this.permissionManager.showPermissionSetup();
       if (!granted) return;
     }
     
-    // 继续原有逻辑
+    // Continue with existing logic
     // ...
   }
 }
 ```
 
-### 2. 简化 PermissionWebview
+### 2. Simplified PermissionWebview
 
 ```typescript
 export class PermissionWebviewProvider {
@@ -562,13 +562,13 @@ export class PermissionWebviewProvider {
     context: vscode.ExtensionContext,
     permissionManager?: PermissionManager
   ): Promise<boolean> {
-    // ... 现有代码 ...
+    // ... existing code ...
     
-    // 增强消息处理
+    // Enhanced message handling
     panel.webview.onDidReceiveMessage(async message => {
       switch (message.command) {
         case 'accept':
-          // 触发验证
+          // Trigger verification
           if (permissionManager) {
             this.verificationInProgress = true;
             panel.webview.postMessage({ 
@@ -585,25 +585,25 @@ export class PermissionWebviewProvider {
               panel.webview.postMessage({ 
                 command: 'updateStatus', 
                 status: 'failed',
-                message: '未检测到权限，请确保在终端中选择了 "Yes"'
+                message: 'Permission not detected, please ensure you selected "Yes" in the terminal'
               });
             }
             this.verificationInProgress = false;
           }
           break;
-        // ... 其他处理 ...
+        // ... other handling ...
       }
     });
   }
 }
 ```
 
-## 实现细节
+## Implementation Details
 
-### 事件驱动的权限变更
+### Event-Driven Permission Changes
 
 ```typescript
-// 1. PermissionCache 发起事件
+// 1. PermissionCache triggers events
 class PermissionCache extends vscode.EventEmitter<boolean> implements IPermissionCache {
   private cache?: boolean;
   
@@ -611,7 +611,7 @@ class PermissionCache extends vscode.EventEmitter<boolean> implements IPermissio
     const oldValue = this.cache;
     this.cache = await this.configReader.getBypassPermissionStatus();
     
-    // 如果权限从 false 变为 true，触发事件
+    // If permission changes from false to true, trigger event
     if (oldValue === false && this.cache === true) {
       this.fire(true);
     }
@@ -620,20 +620,20 @@ class PermissionCache extends vscode.EventEmitter<boolean> implements IPermissio
   }
 }
 
-// 2. PermissionManager 监听权限变更
+// 2. PermissionManager listens to permission changes
 class PermissionManager {
   private permissionWebview?: vscode.WebviewPanel;
   private currentTerminal?: vscode.Terminal;
   
   constructor(/* ... */) {
-    // 监听权限变更事件
+    // Listen to permission change events
     this.cache.event((hasPermission) => {
       if (hasPermission && this.permissionWebview) {
-        // 自动关闭 WebView
+        // Auto-close WebView
         this.permissionWebview.dispose();
         this.permissionWebview = undefined;
         
-        // 显示成功通知
+        // Show success notification
         NotificationUtils.showAutoDismissNotification(
           '✅ Claude Code permissions detected and verified!'
         );
@@ -643,7 +643,7 @@ class PermissionManager {
   
   async showPermissionSetup(): Promise<boolean> {
     try {
-      // 创建终端
+      // Create terminal
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
       this.currentTerminal = vscode.window.createTerminal({
         name: 'Claude Code - Permission Setup',
@@ -657,18 +657,18 @@ class PermissionManager {
         true
       );
       
-      // 创建 WebView 并保存引用
+      // Create WebView and save reference
       const result = await PermissionWebviewProvider.createOrShow(
         this.context,
-        this  // 传递 PermissionManager 实例
+        this  // Pass PermissionManager instance
       );
       
-      // 保存 WebView 引用以便事件驱动关闭
+      // Save WebView reference for event-driven closure
       this.permissionWebview = PermissionWebviewProvider.currentPanel;
       
       return result;
     } finally {
-      // 清理终端
+      // Clean up terminal
       if (this.currentTerminal) {
         this.currentTerminal.dispose();
         this.currentTerminal = undefined;
@@ -677,73 +677,73 @@ class PermissionManager {
   }
   
   startMonitoring(): void {
-    // 文件监听
+    // File monitoring
     this.configReader.watchConfigFile(async () => {
       await this.cache.refresh();
     });
   }
 }
 
-// 3. WebView 通过 PermissionManager 修改文件
+// 3. WebView modifies file through PermissionManager
 class PermissionWebviewProvider {
   public static createOrShow(
     context: vscode.ExtensionContext,
     permissionManager?: PermissionManager
   ): Promise<boolean> {
-    // ... 现有代码 ...
+    // ... existing code ...
     
     panel.webview.onDidReceiveMessage(async message => {
       switch (message.command) {
         case 'accept':
-          // 用户点击"我已授予权限"
+          // User clicks "I have granted permissions"
           if (permissionManager) {
             try {
-              // 通过 PermissionManager 授予权限
+              // Grant permission through PermissionManager
               const success = await permissionManager.grantPermission();
               
               if (success) {
-                // 关闭 WebView
+                // Close WebView
                 panel.dispose();
                 resolve(true);
               } else {
-                // 显示错误
+                // Show error
                 panel.webview.postMessage({ 
                   command: 'updateStatus', 
                   status: 'failed',
-                  message: '无法设置权限，请重试'
+                  message: 'Unable to set permission, please retry'
                 });
               }
             } catch (error) {
-              // 显示错误
+              // Show error
               panel.webview.postMessage({ 
                 command: 'updateStatus', 
                 status: 'failed',
-                message: `设置权限失败: ${error.message}`
+                message: `Permission setup failed: ${error.message}`
               });
             }
           } else {
-            // 如果没有 permissionManager，回退到原有逻辑
+            // If no permissionManager, fall back to original logic
             panel.dispose();
             resolve(true);
           }
           break;
-        // ... 其他处理 ...
+        // ... other handling ...
       }
     });
   }
 }
 
-// 4. PermissionManager 实现 grantPermission
+// 4. PermissionManager implements grantPermission
 class PermissionManager {
   async grantPermission(): Promise<boolean> {
     try {
-      // 调用 ConfigReader 设置权限
+      // Call ConfigReader to set permission
       await this.configReader.setBypassPermission(true);
       
-      // 刷新缓存
+      // Refresh cache
       await this.cache.refresh();
       
-      // 记录日志
+      // Log activity
       this.outputChannel.appendLine(
         '[PermissionManager] Permission granted via WebView'
       );
@@ -759,23 +759,23 @@ class PermissionManager {
 }
 ```
 
-### 权限验证流程
+### Permission Verification Flow
 
 ```typescript
 class PermissionManager {
   async verifyAndUpdatePermission(): Promise<boolean> {
     try {
-      // 1. 给用户一点时间完成终端操作
+      // 1. Give user time to complete terminal operation
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 2. 验证权限
+      // 2. Verify permission
       const result = await this.verifier.verify();
       
       if (result.hasPermission) {
-        // 3. 清除内存缓存，强制下次读取最新状态
+        // 3. Clear memory cache, force reading latest state next time
         this.invalidateCache();
         
-        // 4. 记录成功
+        // 4. Log success
         this.outputChannel.appendLine(
           '[PermissionManager] Permission verified successfully'
         );
@@ -783,7 +783,7 @@ class PermissionManager {
         return true;
       }
       
-      // 5. 如果失败，提供详细信息
+      // 5. If failed, provide detailed information
       this.outputChannel.appendLine(
         `[PermissionManager] Permission verification failed: ${JSON.stringify(result)}`
       );
@@ -797,7 +797,7 @@ class PermissionManager {
 }
 ```
 
-### 文件操作实现
+### File Operation Implementation
 
 ```typescript
 class ConfigReader {
@@ -805,28 +805,28 @@ class ConfigReader {
   
   async setBypassPermission(value: boolean): Promise<void> {
     try {
-      // 读取现有配置
+      // Read existing configuration
       let config: any = {};
       if (fs.existsSync(this.configPath)) {
         const content = await fs.promises.readFile(this.configPath, 'utf8');
         try {
           config = JSON.parse(content);
         } catch (e) {
-          // 如果解析失败，创建新配置
+          // If parsing fails, create new configuration
           config = {};
         }
       }
       
-      // 设置权限字段
+      // Set permission field
       config.bypassPermissionsModeAccepted = value;
       
-      // 确保目录存在
+      // Ensure directory exists
       const dir = path.dirname(this.configPath);
       if (!fs.existsSync(dir)) {
         await fs.promises.mkdir(dir, { recursive: true });
       }
       
-      // 写回文件
+      // Write back to file
       await fs.promises.writeFile(
         this.configPath,
         JSON.stringify(config, null, 2),
@@ -845,8 +845,8 @@ class ConfigReader {
   }
   
   watchConfigFile(callback: () => void): void {
-    // 使用 Node.js 的 fs.watchFile
-    // 测试证明这是最可靠的方法
+    // Use Node.js fs.watchFile
+    // Testing proves this is the most reliable method
     fs.watchFile(this.configPath, { interval: 2000 }, (curr, prev) => {
       if (curr.mtime.getTime() !== prev.mtime.getTime()) {
         this.outputChannel.appendLine(
@@ -858,82 +858,82 @@ class ConfigReader {
   }
   
   dispose(): void {
-    // 停止监听
+    // Stop monitoring
     fs.unwatchFile(this.configPath);
   }
 }
 ```
 
-## 错误处理
+## Error Handling
 
-### 错误场景
+### Error Scenarios
 
-1. **配置文件不存在**: 引导用户初始化 Claude CLI
-2. **权限字段为 false**: 显示详细的授权步骤
-3. **文件读取失败**: 检查文件权限
-4. **JSON 解析错误**: 提示文件损坏，建议重新初始化
+1. **Configuration file does not exist**: Guide user to initialize Claude CLI
+2. **Permission field is false**: Show detailed authorization steps
+3. **File read failure**: Check file permissions
+4. **JSON parsing error**: Indicate file corruption, suggest re-initialization
 
-### 用户友好的错误消息
+### User-Friendly Error Messages
 
 ```typescript
 function getErrorMessage(result: PermissionCheckResult): string {
   if (!result.configExists) {
-    return '未找到 Claude 配置文件。请先在终端运行 "claude" 命令进行初始化。';
+    return 'Claude configuration file not found. Please run "claude" command in terminal first to initialize.';
   }
   
   if (!result.fieldExists) {
-    return 'Claude 配置文件缺少权限字段。请重新运行权限设置流程。';
+    return 'Claude configuration file missing permission field. Please re-run permission setup flow.';
   }
   
   if (result.fieldValue === false) {
-    return '权限未授予。请在终端中运行 Claude 命令并选择 "Yes, I accept"。';
+    return 'Permission not granted. Please run Claude command in terminal and select "Yes, I accept".';
   }
   
   if (result.error) {
-    return `配置文件读取错误：${result.error}`;
+    return `Configuration file read error: ${result.error}`;
   }
   
-  return '未知错误，请查看输出日志。';
+  return 'Unknown error, please check output logs.';
 }
 ```
 
-## 性能优化
+## Performance Optimization
 
-1. **缓存策略**
-   - 权限状态缓存 5 分钟
-   - 文件变化时立即失效
-   - 用户操作后立即刷新
+1. **Caching Strategy**
+   - Permission status cached for 5 minutes
+   - Immediate invalidation on file changes
+   - Immediate refresh after user operations
 
-2. **异步处理**
-   - 权限检查不阻塞命令执行
-   - 使用 Promise 处理所有 I/O 操作
-   - 支持超时和取消
+2. **Asynchronous Processing**
+   - Permission checks don't block command execution
+   - Use Promise for all I/O operations
+   - Support timeout and cancellation
 
-3. **资源管理**
-   - 正确清理文件监听器
-   - 限制重试次数
-   - 合理的轮询间隔
+3. **Resource Management**
+   - Proper cleanup of file watchers
+   - Limit retry attempts
+   - Reasonable polling intervals
 
-## 状态管理策略
+## State Management Strategy
 
-### 不使用 globalState 作为缓存
+### Not Using globalState as Cache
 
-由于 `~/.claude.json` 文件可能随时被手动修改（用户编辑、其他工具修改等），我们：
+Since the `~/.claude.json` file may be manually modified at any time (user editing, other tool modifications, etc.), we:
 
-1. **移除 globalState 依赖**：不再依赖 `kiroForClaudeCode.hasRunInitialPermission` 作为权限状态
-2. **仅使用内存缓存**：短时间缓存（如 30 秒）以优化性能
-3. **实时验证**：关键操作时总是验证实际文件状态
+1. **Remove globalState dependency**: No longer rely on `kiroForClaudeCode.hasRunInitialPermission` as permission state
+2. **Use memory cache only**: Short-term caching (like 30 seconds) to optimize performance
+3. **Real-time verification**: Always verify actual file state during critical operations
 
-### 缓存策略
+### Caching Strategy
 
-#### 缓存接口设计
+#### Cache Interface Design
 
 ```typescript
 interface IPermissionCache {
-  // 获取权限状态（首次调用时会读文件并缓存，之后直接返回缓存）
+  // Get permission status (first call reads file and caches, subsequent calls return cache)
   get(): Promise<boolean>;
   
-  // 读取文件并更新缓存（文件变化或需要强制验证时调用）
+  // Read file and update cache (called when file changes or forced verification needed)
   refresh(): Promise<boolean>;
 }
 
@@ -946,12 +946,12 @@ class PermissionCache implements IPermissionCache {
   ) {}
   
   async get(): Promise<boolean> {
-    // 如果有缓存，直接返回
+    // If cached, return directly
     if (this.cache !== undefined) {
       return this.cache;
     }
     
-    // 首次调用，读取文件并缓存
+    // First call, read file and cache
     this.cache = await this.configReader.getBypassPermissionStatus();
     
     this.outputChannel.appendLine(
@@ -962,7 +962,7 @@ class PermissionCache implements IPermissionCache {
   }
   
   async refresh(): Promise<boolean> {
-    // 读取最新状态并更新缓存
+    // Read latest state and update cache
     this.cache = await this.configReader.getBypassPermissionStatus();
     
     this.outputChannel.appendLine(
@@ -974,7 +974,7 @@ class PermissionCache implements IPermissionCache {
 }
 ```
 
-#### PermissionManager 使用缓存
+#### PermissionManager Using Cache
 
 ```typescript
 class PermissionManager {
@@ -984,41 +984,41 @@ class PermissionManager {
     this.cache = new PermissionCache(this.configReader, this.outputChannel);
   }
   
-  // 刷新并检查权限（扩展启动时使用）
+  // Refresh and check permission (used at extension startup)
   async refreshAndCheckPermission(): Promise<boolean> {
     return this.cache.refresh();
   }
   
-  // 日常权限检查：使用缓存
+  // Daily permission check: use cache
   async checkPermission(): Promise<boolean> {
     return this.cache.get();
   }
   
-  // 验证用户授权（用于权限设置流程）
+  // Verify user authorization (for permission setup flow)
   async verifyAndUpdatePermission(): Promise<boolean> {
     await new Promise(resolve => setTimeout(resolve, 2000));
     return this.cache.refresh();
   }
   
-  // 文件变化时更新缓存
+  // Update cache when file changes
   async onFileChanged(): Promise<void> {
     await this.cache.refresh();
   }
 }
 
-## 测试计划
+## Testing Plan
 
-1. **单元测试**
-   - Mock 文件系统操作
-   - 测试各种权限状态
-   - 验证缓存逻辑
+1. **Unit Tests**
+   - Mock file system operations
+   - Test various permission states
+   - Verify cache logic
 
-2. **集成测试**
-   - 完整的权限流程
-   - WebView 交互
-   - 错误恢复
+2. **Integration Tests**
+   - Complete permission flow
+   - WebView interactions
+   - Error recovery
 
-3. **手动测试场景**
-   - 首次安装
-   - 权限撤销后恢复
-   - 文件损坏处理
+3. **Manual Testing Scenarios**
+   - First installation
+   - Recovery after permission revocation
+   - Corrupted file handling
