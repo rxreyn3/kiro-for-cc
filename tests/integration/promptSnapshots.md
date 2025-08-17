@@ -1,30 +1,30 @@
-# Prompt 快照测试用例
+# Prompt Snapshot Test Cases
 
-## 测试文件
+## Test File
 
 `promptSnapshots.test.ts`
 
-## 测试目的
+## Test Purpose
 
-使用 Jest 快照测试功能确保所有 prompt 模板的输出保持稳定，防止意外的内容改动影响用户体验。快照测试会保存每个 prompt 的完整渲染输出，并在后续运行时进行比较。
+Use Jest snapshot testing functionality to ensure all prompt template outputs remain stable, preventing accidental content changes from affecting user experience. Snapshot tests save the complete rendered output of each prompt and compare them in subsequent runs.
 
-## 测试用例概览
+## Test Case Overview
 
-| 用例 ID | 功能描述                               | 测试类型 |
-| ------- | -------------------------------------- | -------- |
-| INT-15  | create spec prompt 快照测试            | 回归测试 |
-| INT-16  | init steering prompt 快照测试          | 回归测试 |
-| INT-17  | create custom steering prompt 快照测试 | 回归测试 |
-| INT-18  | refine steering prompt 快照测试        | 回归测试 |
-| INT-19  | delete steering prompt 快照测试        | 回归测试 |
+| Case ID | Function Description                   | Test Type        |
+| ------- | -------------------------------------- | ---------------- |
+| INT-15  | create spec prompt snapshot test      | Regression Test  |
+| INT-16  | init steering prompt snapshot test    | Regression Test  |
+| INT-17  | create custom steering prompt snapshot test | Regression Test |
+| INT-18  | refine steering prompt snapshot test  | Regression Test  |
+| INT-19  | delete steering prompt snapshot test  | Regression Test  |
 
-## 详细测试步骤
+## Detailed Test Steps
 
-### INT-15: create spec prompt 快照测试
+### INT-15: create spec prompt snapshot test
 
-**测试目的**: 确保 spec 创建 prompt 的输出保持稳定
+**Test Purpose**: Ensure spec creation prompt output remains stable
 
-**准备数据**:
+**Test Data**:
 
 ```typescript
 {
@@ -34,22 +34,22 @@
 }
 ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 初始化 PromptLoader
-2. 渲染 create-spec prompt
-3. 使用 `toMatchSnapshot()` 比较输出
+1. Initialize PromptLoader
+2. Render create-spec prompt
+3. Use `toMatchSnapshot()` to compare output
 
-**预期结果**:
+**Expected Results**:
 
-- 第一次运行：创建快照文件
-- 后续运行：输出与快照匹配
+- First run: Create snapshot file
+- Subsequent runs: Output matches snapshot
 
-### INT-16: init steering prompt 快照测试
+### INT-16: init steering prompt snapshot test
 
-**测试目的**: 确保 steering 初始化 prompt 的输出保持稳定
+**Test Purpose**: Ensure steering initialization prompt output remains stable
 
-**准备数据**:
+**Test Data**:
 
 ```typescript
 {
@@ -57,21 +57,21 @@
 }
 ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 init-steering prompt
-2. 比较快照
+1. Render init-steering prompt
+2. Compare snapshot
 
-**预期结果**:
+**Expected Results**:
 
-- 输出包含正确的路径和初始化指令
-- 与保存的快照一致
+- Output contains correct path and initialization instructions
+- Matches saved snapshot
 
-### INT-17: create custom steering prompt 快照测试
+### INT-17: create custom steering prompt snapshot test
 
-**测试目的**: 确保自定义 steering 创建 prompt 的输出保持稳定
+**Test Purpose**: Ensure custom steering creation prompt output remains stable
 
-**准备数据**:
+**Test Data**:
 
 ```typescript
 {
@@ -80,21 +80,21 @@
 }
 ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 create-custom-steering prompt
-2. 比较快照
+1. Render create-custom-steering prompt
+2. Compare snapshot
 
-**预期结果**:
+**Expected Results**:
 
-- 输出包含用户描述
-- 与保存的快照一致
+- Output contains user description
+- Matches saved snapshot
 
-### INT-18: refine steering prompt 快照测试
+### INT-18: refine steering prompt snapshot test
 
-**测试目的**: 确保 steering 精炼 prompt 的输出保持稳定
+**Test Purpose**: Ensure steering refinement prompt output remains stable
 
-**准备数据**:
+**Test Data**:
 
 ```typescript
 {
@@ -102,21 +102,21 @@
 }
 ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 refine-steering prompt
-2. 比较快照
+1. Render refine-steering prompt
+2. Compare snapshot
 
-**预期结果**:
+**Expected Results**:
 
-- 输出包含文件路径和精炼指南
-- 与保存的快照一致
+- Output contains file path and refinement guidelines
+- Matches saved snapshot
 
-### INT-19: delete steering prompt 快照测试
+### INT-19: delete steering prompt snapshot test
 
-**测试目的**: 确保 steering 删除 prompt 的输出保持稳定
+**Test Purpose**: Ensure steering deletion prompt output remains stable
 
-**准备数据**:
+**Test Data**:
 
 ```typescript
 {
@@ -125,91 +125,91 @@
 }
 ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 delete-steering prompt
-2. 比较快照
+1. Render delete-steering prompt
+2. Compare snapshot
 
-**预期结果**:
+**Expected Results**:
 
-- 输出包含文档名称和路径
-- 与保存的快照一致
+- Output contains document name and path
+- Matches saved snapshot
 
-## 快照文件管理
+## Snapshot File Management
 
-### 快照文件位置
+### Snapshot File Location
 
-- 快照保存在 `__snapshots__/promptSnapshots.test.ts.snap`
-- 每个测试用例对应一个快照条目
+- Snapshots are saved in `__snapshots__/promptSnapshots.test.ts.snap`
+- Each test case corresponds to one snapshot entry
 
-### 更新快照
+### Updating Snapshots
 
-当 prompt 模板有意修改时：
+When prompt templates are intentionally modified:
 
 ```bash
-# 更新所有快照
+# Update all snapshots
 npm test promptSnapshots.test.ts -- -u
 
-# 交互式更新
+# Interactive update
 npm test promptSnapshots.test.ts -- -i
 ```
 
-### 查看差异
+### Viewing Differences
 
-测试失败时会显示详细的差异：
+When tests fail, detailed differences are displayed:
 
-- 红色：被删除的内容
-- 绿色：新增的内容
-- 灰色：未改变的上下文
+- Red: Deleted content
+- Green: Added content
+- Gray: Unchanged context
 
-## 最佳实践
+## Best Practices
 
-### 1. 固定测试数据
+### 1. Fixed Test Data
 
-- 使用固定的测试输入，避免随机值
-- 路径使用 `/snapshot/test` 前缀
-- 描述使用英文，避免编码问题
+- Use fixed test inputs, avoid random values
+- Use `/snapshot/test` prefix for paths
+- Use English descriptions to avoid encoding issues
 
-### 2. 版本控制
+### 2. Version Control
 
-- 快照文件必须提交到 Git
-- PR 中要审查快照的变化
-- 使用有意义的提交信息
+- Snapshot files must be committed to Git
+- Review snapshot changes in PRs
+- Use meaningful commit messages
 
-### 3. 定期审查
+### 3. Regular Review
 
-- 定期检查快照是否过于庞大
-- 考虑是否需要简化 prompt
-- 确保快照反映实际使用场景
+- Regularly check if snapshots are too large
+- Consider whether prompts need simplification
+- Ensure snapshots reflect actual usage scenarios
 
-### 4. CI/CD 集成
+### 4. CI/CD Integration
 
-- 在 CI 中运行快照测试
-- 禁止在 CI 中更新快照
-- 快照不匹配应导致构建失败
+- Run snapshot tests in CI
+- Prohibit updating snapshots in CI
+- Snapshot mismatches should cause build failures
 
-## 常见问题
+## Common Issues
 
-### 快照过大
+### Snapshots Too Large
 
-如果快照文件变得过大：
+If snapshot files become too large:
 
-1. 考虑只测试关键部分
-2. 使用 `expect.stringContaining()` 测试部分内容
-3. 将大型 prompt 拆分为多个小测试
+1. Consider testing only key parts
+2. Use `expect.stringContaining()` to test partial content
+3. Split large prompts into multiple small tests
 
-### 跨平台问题
+### Cross-Platform Issues
 
-不同操作系统可能产生不同的换行符：
+Different operating systems may produce different line endings:
 
-1. 在 `.gitattributes` 中设置快照文件的换行符
-2. 使用 `prettier` 格式化快照
-3. 在测试中规范化换行符
+1. Set line endings for snapshot files in `.gitattributes`
+2. Use `prettier` to format snapshots
+3. Normalize line endings in tests
 
-### 快照丢失
+### Missing Snapshots
 
-如果快照文件丢失：
+If snapshot files are missing:
 
-1. 运行测试重新生成
-2. 从版本控制恢复
-3. 确保 `.gitignore` 没有忽略快照文件
+1. Run tests to regenerate
+2. Restore from version control
+3. Ensure `.gitignore` is not ignoring snapshot files

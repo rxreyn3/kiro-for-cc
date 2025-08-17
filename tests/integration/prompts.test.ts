@@ -11,7 +11,7 @@ describe('Prompt Integration Tests', () => {
   });
 
   describe('Spec Creation Prompt', () => {
-    test('INT-01: 生成正确的 spec 创建 prompt', () => {
+    test('INT-01: Generate correct spec creation prompt', () => {
       const variables = {
         description: 'A user authentication system with OAuth support',
         workspacePath: '/Users/test/my-project',
@@ -35,7 +35,7 @@ describe('Prompt Integration Tests', () => {
       expect(result).toContain('Tasks');
     });
 
-    test('INT-02: 验证 spec prompt 包含目录创建指令', () => {
+    test('INT-02: Verify spec prompt contains directory creation instructions', () => {
       const result = promptLoader.renderPrompt('create-spec', {
         description: 'test feature',
         workspacePath: '/test',
@@ -49,7 +49,7 @@ describe('Prompt Integration Tests', () => {
 
   describe('Steering Prompts', () => {
     describe('Init Steering', () => {
-      test('INT-03: 生成 steering 初始化 prompt', () => {
+      test('INT-03: Generate steering initialization prompt', () => {
         const result = promptLoader.renderPrompt('init-steering', {
           steeringPath: '/Users/test/project/.claude/steering'
         });
@@ -59,7 +59,7 @@ describe('Prompt Integration Tests', () => {
         expect(result).toContain('codebase');
       });
 
-      test('INT-04: 验证 steering prompt 包含分析指令', () => {
+      test('INT-04: Verify steering prompt contains analysis instructions', () => {
         const result = promptLoader.renderPrompt('init-steering', {
           steeringPath: '/test/.claude/steering'
         });
@@ -69,7 +69,7 @@ describe('Prompt Integration Tests', () => {
         expect(result).toContain('conventions');
       });
 
-      test('INT-05: 验证 steering prompt 包含文件指令', () => {
+      test('INT-05: Verify steering prompt contains file instructions', () => {
         const result = promptLoader.renderPrompt('init-steering', {
           steeringPath: '/test/.claude/steering'
         });
@@ -80,7 +80,7 @@ describe('Prompt Integration Tests', () => {
     });
 
     describe('Create Custom Steering', () => {
-      test('INT-06: 生成自定义 steering 创建 prompt', () => {
+      test('INT-06: Generate custom steering creation prompt', () => {
         const result = promptLoader.renderPrompt('create-custom-steering', {
           description: 'Security best practices for API development',
           steeringPath: '/test/project/.claude/steering'
@@ -91,7 +91,7 @@ describe('Prompt Integration Tests', () => {
         expect(result).toContain('/test/project/.claude/steering');
       });
 
-      test('INT-07: 验证自定义 steering 文件命名指令', () => {
+      test('INT-07: Verify custom steering file naming instructions', () => {
         const result = promptLoader.renderPrompt('create-custom-steering', {
           description: 'Test guidelines',
           steeringPath: '/test/.claude/steering'
@@ -103,7 +103,7 @@ describe('Prompt Integration Tests', () => {
     });
 
     describe('Refine Steering', () => {
-      test('INT-08: 生成 steering 精炼 prompt', () => {
+      test('INT-08: Generate steering refinement prompt', () => {
         const result = promptLoader.renderPrompt('refine-steering', {
           filePath: '/test/project/.claude/steering/security.md'
         });
@@ -113,7 +113,7 @@ describe('Prompt Integration Tests', () => {
         expect(result).toContain('Review and refine');
       });
 
-      test('INT-09: 验证精炼 prompt 改进指南', () => {
+      test('INT-09: Verify refinement prompt improvement guidelines', () => {
         const result = promptLoader.renderPrompt('refine-steering', {
           filePath: '/test/.claude/steering/test.md'
         });
@@ -125,7 +125,7 @@ describe('Prompt Integration Tests', () => {
     });
 
     describe('Delete Steering', () => {
-      test('INT-10: 生成 steering 删除 prompt', () => {
+      test('INT-10: Generate steering deletion prompt', () => {
         const result = promptLoader.renderPrompt('delete-steering', {
           documentName: 'security-practices.md',
           steeringPath: '/test/.claude/steering'
@@ -139,7 +139,7 @@ describe('Prompt Integration Tests', () => {
   });
 
   describe('Prompt Structure Validation', () => {
-    test('INT-11: 验证所有 prompts 的 frontmatter', () => {
+    test('INT-11: Verify frontmatter of all prompts', () => {
       const allPrompts = promptLoader.listPrompts();
 
       expect(allPrompts.length).toBeGreaterThan(0);
@@ -151,7 +151,7 @@ describe('Prompt Integration Tests', () => {
       });
     });
 
-    test('INT-12: 验证所有 prompts 可成功渲染', () => {
+    test('INT-12: Verify all prompts can be successfully rendered', () => {
       const testCases = [
         {
           id: 'create-spec',
@@ -196,7 +196,7 @@ describe('Prompt Integration Tests', () => {
   });
 
   describe('Prompt Content Quality', () => {
-    test('INT-13: 验证渲染内容不含模板错误', () => {
+    test('INT-13: Verify rendered content contains no template errors', () => {
       const testCases = [
         {
           id: 'create-spec',
@@ -225,7 +225,7 @@ describe('Prompt Integration Tests', () => {
       });
     });
 
-    test('INT-14: 验证 prompts 的结构一致性', () => {
+    test('INT-14: Verify structural consistency of prompts', () => {
       const specPrompt = promptLoader.renderPrompt('create-spec', {
         description: 'test',
         workspacePath: '/test',

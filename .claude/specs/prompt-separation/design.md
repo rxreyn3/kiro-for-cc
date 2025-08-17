@@ -2,11 +2,11 @@
 
 ## Overview
 
-本设计方案旨在将 Kiro for CC 扩展中硬编码的 prompt 模板分离到独立的 Markdown 文件中，作为内部资源进行管理。通过建立标准化的 prompt 文件结构和加载机制，提高代码的可维护性和开发效率。
+This design proposal aims to separate hard-coded prompt templates in the Kiro for CC extension into independent Markdown files for management as internal resources. By establishing standardized prompt file structure and loading mechanisms, we improve code maintainability and development efficiency.
 
 ## Architecture
 
-### 系统架构图
+### System Architecture Diagram
 
 ```mermaid
 graph TB
@@ -26,18 +26,18 @@ graph TB
     
 ```
 
-### 核心设计原则
+### Core Design Principles
 
-1. **一步到位**：直接替换所有硬编码 prompt，不保留降级逻辑
-2. **简单直接**：减少中间层，降低复杂度
-3. **开发友好**：提供便捷的开发工具和调试功能
-4. **性能优先**：使用缓存机制，避免频繁的文件 I/O
+1. **All-in-One**: Directly replace all hard-coded prompts without maintaining fallback logic
+2. **Simple and Direct**: Reduce intermediate layers, lower complexity
+3. **Developer-Friendly**: Provide convenient development tools and debugging features
+4. **Performance-First**: Use caching mechanisms to avoid frequent file I/O
 
 ## Components and Interfaces
 
-### 1. Prompt 文件格式
+### 1. Prompt File Format
 
-采用 Markdown + Frontmatter 格式，实现配置与内容的优雅分离：
+Using Markdown + Frontmatter format to achieve elegant separation of configuration and content:
 
 ```markdown
 <!-- src/prompts/spec/agent-system.md -->
@@ -65,36 +65,36 @@ Specs base path: {{specsPath}}
 ...
 ```
 
-**优势**：
+**Advantages**:
 
-- Prompt 内容使用自然的 Markdown 格式，无需转义
-- Frontmatter 存储元数据，结构清晰
-- VSCode 原生支持语法高亮和预览
-- Git 版本控制友好
+- Prompt content uses natural Markdown format, no escaping required
+- Frontmatter stores metadata with clear structure
+- VSCode native support for syntax highlighting and preview
+- Git version control friendly
 
 ### 2. PromptLoader Service
 
-核心服务，负责加载、解析和渲染 prompt：
+Core service responsible for loading, parsing, and rendering prompts:
 
-**实现要点**：
+**Implementation Key Points**:
 
-- 使用构建脚本将 .md 文件编译为 TypeScript 模块
-- 使用 `gray-matter` 库解析 Markdown frontmatter
-- 使用 Handlebars 模板引擎处理变量替换
-- 启动时预编译所有模板，存储在内存中
+- Use build scripts to compile .md files into TypeScript modules
+- Use `gray-matter` library to parse Markdown frontmatter
+- Use Handlebars template engine for variable substitution
+- Pre-compile all templates at startup and store in memory
 
 ```typescript
 interface PromptLoader {
-  // 加载内部 prompt 资源
+  // Load internal prompt resources
   loadPrompt(promptId: string): PromptTemplate;
   
-  // 渲染 prompt，替换变量
+  // Render prompt with variable substitution
   renderPrompt(promptId: string, variables: Record<string, any>): string;
   
-  // 获取所有可用的 prompt
+  // Get all available prompts
   listPrompts(): PromptMetadata[];
   
-  // 预加载所有 prompt（初始化时调用）
+  // Pre-load all prompts (called during initialization)
   initialize(): void;
 }
 
@@ -108,18 +108,18 @@ interface PromptTemplate {
 }
 ```
 
-### 3. Prompt 导出接口
+### 3. Prompt Export Interface
 
-直接替换现有的硬编码实现：
+Directly replace existing hard-coded implementations:
 
 ```typescript
-// 修改现有的 prompts 文件
+// Modify existing prompt files
 export function getSpecAgentSystemPrompt(specsPath: string): string {
   const loader = PromptLoader.getInstance();
   return loader.renderPrompt('spec-agent-system', { specsPath });
 }
 
-// 保持接口兼容，仅改变内部实现
+// Maintain interface compatibility, only change internal implementation
 export const SPEC_REFINE_PROMPTS = {
   requirements: (content: string) => 
     loader.renderPrompt('spec-requirements-refine', { content }),
@@ -132,11 +132,11 @@ export const SPEC_REFINE_PROMPTS = {
 
 ## Data Models
 
-### 目录结构
+### Directory Structure
 
 ```plain
 src/
-├── prompts/           # Prompt 资源文件
+├── prompts/           # Prompt resource files
 │   ├── spec/
 │   │   ├── agent-system.md
 │   │   ├── requirements-refine.md
@@ -149,7 +149,7 @@ src/
 │   │   └── refine.md
 │   └── shared/
 │       └── common-templates.md
-├── services/          # 服务层
+├── services/          # Service layer
 │   └── promptLoader.ts
 └── types/
     └── prompt.types.ts
@@ -159,18 +159,18 @@ src/
 
 ```typescript
 interface PromptFrontmatter {
-  // 必填字段
-  id: string;              // 唯一标识符，使用 kebab-case
-  name: string;            // 显示名称
-  version: string;         // 语义化版本号 (x.y.z)
+  // Required fields
+  id: string;              // Unique identifier, use kebab-case
+  name: string;            // Display name
+  version: string;         // Semantic version number (x.y.z)
   
-  // 可选字段
-  description?: string;    // 描述
-  author?: string;         // 作者
-  tags?: string[];         // 标签，用于分类和搜索
-  extends?: string;        // 继承另一个 prompt 的 ID
+  // Optional fields
+  description?: string;    // Description
+  author?: string;         // Author
+  tags?: string[];         // Tags for categorization and search
+  extends?: string;        // ID of another prompt to inherit from
   
-  // 变量定义
+  // Variable definitions
   variables?: {
     [key: string]: {
       type: 'string' | 'number' | 'boolean' | 'array' | 'object';
@@ -182,7 +182,7 @@ interface PromptFrontmatter {
 }
 ```
 
-**示例文件**：
+**Example File**:
 
 ```markdown
 ---
@@ -216,113 +216,113 @@ Please refine the requirements document...
 
 ## Error Handling
 
-### 错误类型和处理策略
+### Error Types and Handling Strategies
 
-1. **资源不存在**
-   - 开发时构建失败，提示缺失的文件
-   - 运行时抛出明确的错误信息
-   - 列出所有可用的 prompt ID
+1. **Resource Not Found**
+   - Build failure during development with missing file prompts
+   - Throw clear error messages at runtime
+   - List all available prompt IDs
 
-2. **语法错误**
-   - 编辑时实时提示
-   - 保存时阻止并显示错误
-   - 提供修复建议
+2. **Syntax Errors**
+   - Real-time prompts during editing
+   - Block and display errors on save
+   - Provide fix suggestions
 
-3. **变量缺失**
-   - 使用默认值（如果定义）
-   - 抛出明确的错误信息
-   - 列出所有必需的变量
+3. **Missing Variables**
+   - Use default values (if defined)
+   - Throw clear error messages
+   - List all required variables
 
-4. **版本不兼容**
-   - 检查 schema 版本
-   - 提供迁移指导
-   - 保持向后兼容
+4. **Version Incompatibility**
+   - Check schema version
+   - Provide migration guidance
+   - Maintain backward compatibility
 
 ## Testing Strategy
 
-### 单元测试
+### Unit Testing
 
-1. **PromptLoader 测试**
-   - 加载有效/无效文件
-   - 变量替换逻辑
-   - 缓存机制
-   - 错误处理
+1. **PromptLoader Testing**
+   - Loading valid/invalid files
+   - Variable substitution logic
+   - Caching mechanism
+   - Error handling
 
-2. **模板引擎测试**
-   - 变量替换
-   - 条件逻辑
-   - 循环结构
-   - 转义处理
+2. **Template Engine Testing**
+   - Variable substitution
+   - Conditional logic
+   - Loop structures
+   - Escape handling
 
-### 集成测试
+### Integration Testing
 
-1. **端到端工作流**
-   - 创建新 prompt
-   - 编辑并保存
-   - 在 Claude Code 中使用
-   - 验证输出正确
+1. **End-to-End Workflow**
+   - Create new prompt
+   - Edit and save
+   - Use in Claude Code
+   - Verify correct output
 
-2. **迁移验证**
-   - 确保所有 prompt 都已转换为文件
-   - 验证功能一致性
-   - 性能对比测试
+2. **Migration Verification**
+   - Ensure all prompts are converted to files
+   - Verify functional consistency
+   - Performance comparison testing
 
-### 手动测试
+### Manual Testing
 
-1. **开发体验**
-   - 编辑器功能
-   - 错误提示
-   - 自动完成
-   - 快速操作
+1. **Development Experience**
+   - Editor functionality
+   - Error prompts
+   - Auto-completion
+   - Quick actions
 
-2. **用户场景**
-   - Spec 创建流程
-   - Steering 文档生成
-   - Prompt 调试
+2. **User Scenarios**
+   - Spec creation flow
+   - Steering document generation
+   - Prompt debugging
 
-## 实现细节
+## Implementation Details
 
-### 技术选型
+### Technology Choices
 
-1. **Frontmatter 解析**：使用 `gray-matter` 库
-2. **模板引擎**：使用 `handlebars` 处理变量替换
-3. **资源加载**：使用构建脚本在编译时将 .md 文件转换为 TypeScript 模块
-4. **缓存策略**：启动时预加载所有模板到内存
-5. **Markdown 处理**：直接使用原始内容，不需要额外解析
+1. **Frontmatter Parsing**: Use `gray-matter` library
+2. **Template Engine**: Use `handlebars` for variable substitution
+3. **Resource Loading**: Use build scripts to convert .md files to TypeScript modules at compile time
+4. **Caching Strategy**: Pre-load all templates to memory at startup
+5. **Markdown Processing**: Use raw content directly, no additional parsing needed
 
-### 性能优化
+### Performance Optimization
 
-1. **预加载**：扩展激活时加载所有 prompt
-2. **预编译**：Handlebars 模板在初始化时编译
-3. **内存缓存**：所有模板常驻内存
-4. **同步访问**：无需异步 I/O，提高响应速度
+1. **Pre-loading**: Load all prompts when extension activates
+2. **Pre-compilation**: Handlebars templates compiled at initialization
+3. **Memory Caching**: All templates resident in memory
+4. **Synchronous Access**: No async I/O needed, improved response speed
 
-### 安全考虑
+### Security Considerations
 
-1. **内部资源**：prompt 文件打包在扩展内，用户无法修改
-2. **模板注入**：转义用户输入的变量
-3. **类型安全**：TypeScript 类型定义确保参数正确
-4. **构建时验证**：打包时验证所有 prompt 文件的格式
+1. **Internal Resources**: Prompt files packaged within extension, users cannot modify
+2. **Template Injection**: Escape user input variables
+3. **Type Safety**: TypeScript type definitions ensure correct parameters
+4. **Build-time Validation**: Validate all prompt file formats during packaging
 
 ## Task Implementation Context Design
 
-> **注意**：本章节作为设计补充备忘，记录未来的实现思路，不在本期 prompt-separation 功能中实现。
+> **Note**: This section serves as a design supplement memo, recording future implementation ideas, not implemented in the current prompt-separation feature.
 
-### 概述
+### Overview
 
-当执行 spec 中的具体任务时，需要为 Claude Code 提供充分的上下文信息。这包括：
+When executing specific tasks in specs, comprehensive context information needs to be provided to Claude Code. This includes:
 
-1. **Steering 文档**：项目级别的指导原则和约定
-2. **Spec 文档**：特定功能的需求、设计和任务列表
+1. **Steering Documents**: Project-level guidance principles and conventions
+2. **Spec Documents**: Specific feature requirements, design, and task lists
 
-### 上下文加载策略
+### Context Loading Strategy
 
 ```typescript
 interface TaskContext {
-  // Steering 文档内容
+  // Steering document content
   steeringDocuments: SteeringDocument[];
   
-  // 当前 spec 的所有文档
+  // All documents of current spec
   spec: {
     requirements: string;
     design: string;
@@ -334,24 +334,24 @@ interface TaskContext {
 interface SteeringDocument {
   name: string;
   content: string;
-  // 可以扩展包含优先级、适用范围等元数据
+  // Can be extended to include priority, scope and other metadata
 }
 ```
 
-### 实现方案
+### Implementation Approach
 
-1. **上下文收集器**
-   - 在执行任务前，自动收集所有相关的 steering 文档
-   - 加载当前 spec 的完整文档（requirements, design, tasks）
-   - 识别当前要执行的具体任务
+1. **Context Collector**
+   - Automatically collect all relevant steering documents before task execution
+   - Load complete documents of current spec (requirements, design, tasks)
+   - Identify specific task to execute
 
-2. **Prompt 构建**
-   - 将收集的上下文按优先级组织
-   - Steering 文档作为全局指导
-   - Spec 文档作为具体功能上下文
-   - 当前任务作为执行焦点
+2. **Prompt Construction**
+   - Organize collected context by priority
+   - Steering documents as global guidance
+   - Spec documents as specific feature context
+   - Current task as execution focus
 
-3. **示例 Prompt 结构**
+3. **Example Prompt Structure**
 
    ```markdown
    <system>
@@ -379,23 +379,23 @@ interface SteeringDocument {
    {{spec.currentTask.details}}
    ```
 
-### 集成点
+### Integration Points
 
-1. **任务执行命令**
-   - 修改 `kfc.task.implement` 命令
-   - 在调用 Claude Code 前自动加载上下文
+1. **Task Execution Commands**
+   - Modify `kfc.task.implement` command
+   - Automatically load context before calling Claude Code
 
 2. **ClaudeCodeProvider**
-   - 新增 `executeTaskWithContext` 方法
-   - 负责收集和组织上下文
+   - Add `executeTaskWithContext` method
+   - Responsible for collecting and organizing context
 
 3. **SpecManager**
-   - 提供获取完整 spec 文档的方法
-   - 支持任务定位和提取
+   - Provide methods to get complete spec documents
+   - Support task location and extraction
 
-### 优势
+### Advantages
 
-1. **完整上下文**：Claude Code 能够理解项目约定和具体需求
-2. **一致性**：确保实现符合项目标准和设计方案
-3. **自动化**：无需手动复制粘贴文档内容
-4. **可扩展**：未来可以添加更多上下文源（如相关代码、测试等）
+1. **Complete Context**: Claude Code can understand project conventions and specific requirements
+2. **Consistency**: Ensure implementation conforms to project standards and design plans
+3. **Automation**: No need to manually copy and paste document content
+4. **Extensible**: Can add more context sources in the future (such as related code, tests, etc.)

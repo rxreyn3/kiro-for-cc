@@ -48,8 +48,8 @@ describe('ConfigReader', () => {
         }
     });
 
-    describe('读取配置文件', () => {
-        it('CR-01: 读取存在的配置文件并返回权限状态', async () => {
+    describe('Read config file', () => {
+        it('CR-01: Read existing config file and return permission status', async () => {
             const mockConfig = {
                 bypassPermissionsModeAccepted: true,
                 otherField: 'value'
@@ -68,7 +68,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-02: 配置文件不存在时返回 false', async () => {
+        it('CR-02: Return false when config file does not exist', async () => {
             (fs.existsSync as jest.Mock).mockReturnValue(false);
 
             const result = await configReader.getBypassPermissionStatus();
@@ -80,7 +80,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-03: 配置文件 JSON 格式错误时返回 false', async () => {
+        it('CR-03: Return false when config file JSON format is invalid', async () => {
             (fs.existsSync as jest.Mock).mockReturnValue(true);
             (fs.promises.readFile as jest.Mock).mockResolvedValue('{ invalid json }');
 
@@ -92,7 +92,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-04: bypassPermissionsModeAccepted 字段缺失', async () => {
+        it('CR-04: bypassPermissionsModeAccepted field missing', async () => {
             const mockConfig = {
                 otherField: 'value'
             };
@@ -105,7 +105,7 @@ describe('ConfigReader', () => {
             expect(result).toBe(false);
         });
 
-        it('CR-04-2: bypassPermissionsModeAccepted 为 false 时返回 false', async () => {
+        it('CR-04-2: Return false when bypassPermissionsModeAccepted is false', async () => {
             const mockConfig = {
                 bypassPermissionsModeAccepted: false
             };
@@ -119,8 +119,8 @@ describe('ConfigReader', () => {
         });
     });
 
-    describe('写入配置文件', () => {
-        it('CR-05: 设置权限状态到新文件', async () => {
+    describe('Write config file', () => {
+        it('CR-05: Set permission status to new file', async () => {
             (fs.existsSync as jest.Mock).mockReturnValue(false);
             (fs.promises.mkdir as jest.Mock).mockResolvedValue(undefined);
             (fs.promises.writeFile as jest.Mock).mockResolvedValue(undefined);
@@ -141,7 +141,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-06: 更新现有配置文件保留其他字段', async () => {
+        it('CR-06: Update existing config file preserving other fields', async () => {
             const existingConfig = {
                 bypassPermissionsModeAccepted: false,
                 apiKey: 'secret',
@@ -166,7 +166,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-07: 配置文件解析失败重试机制', async () => {
+        it('CR-07: Config file parse failure retry mechanism', async () => {
             const invalidJson = '{ invalid json }';
             let parseCallCount = 0;
             const originalParse = JSON.parse;
@@ -203,7 +203,7 @@ describe('ConfigReader', () => {
             JSON.parse = originalParse;
         });
 
-        it('CR-08: 创建目录如果不存在', async () => {
+        it('CR-08: Create directory if it doesn\'t exist', async () => {
             (fs.existsSync as jest.Mock)
                 .mockReturnValueOnce(false)  // File doesn't exist
                 .mockReturnValueOnce(false); // Directory doesn't exist
@@ -219,7 +219,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-05-2: 写入失败时抛出错误', async () => {
+        it('CR-05-2: Throw error when write fails', async () => {
             const writeError = new Error('Write failed');
             (fs.existsSync as jest.Mock).mockReturnValue(false);
             (fs.promises.writeFile as jest.Mock).mockRejectedValue(writeError);
@@ -232,8 +232,8 @@ describe('ConfigReader', () => {
         });
     });
 
-    describe('文件监控', () => {
-        it('CR-09: 文件监控触发回调', async () => {
+    describe('File monitoring', () => {
+        it('CR-09: File monitoring triggers callback', async () => {
             const mockCallback = jest.fn();
             const mockWatcher = jest.fn();
             
@@ -261,7 +261,7 @@ describe('ConfigReader', () => {
             expect(mockCallback).toHaveBeenCalled();
         });
 
-        it('CR-10: dispose 清理文件监控', () => {
+        it('CR-10: dispose cleans up file monitoring', () => {
             const mockCallback = jest.fn();
             (fs.watchFile as jest.Mock).mockImplementation(() => {});
             (fs.unwatchFile as jest.Mock).mockImplementation(() => {});
@@ -278,7 +278,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-10-2: 未设置监控时 dispose 不执行清理', () => {
+        it('CR-10-2: dispose does not execute cleanup when monitoring not set', () => {
             (fs.unwatchFile as jest.Mock).mockImplementation(() => {});
 
             // Dispose without watching
@@ -288,8 +288,8 @@ describe('ConfigReader', () => {
         });
     });
 
-    describe('边界情况', () => {
-        it('CR-01-3: 处理文件读取异常', async () => {
+    describe('Edge cases', () => {
+        it('CR-01-3: Handle file read exceptions', async () => {
             const readError = new Error('Read failed');
             (fs.existsSync as jest.Mock).mockReturnValue(true);
             (fs.promises.readFile as jest.Mock).mockRejectedValue(readError);
@@ -302,7 +302,7 @@ describe('ConfigReader', () => {
             );
         });
 
-        it('CR-04-3: 处理非布尔值的 bypassPermissionsModeAccepted', async () => {
+        it('CR-04-3: Handle non-boolean bypassPermissionsModeAccepted', async () => {
             const mockConfig = {
                 bypassPermissionsModeAccepted: 'true' // String instead of boolean
             };

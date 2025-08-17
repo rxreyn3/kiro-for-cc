@@ -12,23 +12,23 @@ export class ConfigReader {
     }
 
     /**
-     * 读取 bypassPermissionsModeAccepted 字段的值
+     * Read the value of bypassPermissionsModeAccepted field
      */
     async getBypassPermissionStatus(): Promise<boolean> {
         try {
-            // 检查文件是否存在
+            // Check if file exists
             if (!fs.existsSync(this.configPath)) {
                 this.outputChannel.appendLine(`[ConfigReader] Config file not found: ${this.configPath}`);
                 return false;
             }
 
-            // 读取文件内容
+            // Read file content
             const content = await fs.promises.readFile(this.configPath, 'utf8');
 
-            // 解析 JSON
+            // Parse JSON
             const config = JSON.parse(content);
 
-            // 返回权限字段值，默认为 false
+            // Return permission field value, default to false
             const hasPermission = config.bypassPermissionsModeAccepted === true;
 
             return hasPermission;
@@ -39,13 +39,13 @@ export class ConfigReader {
     }
 
     /**
-     * 设置 bypassPermissionsModeAccepted 字段的值
+     * Set the value of bypassPermissionsModeAccepted field
      */
     async setBypassPermission(value: boolean): Promise<void> {
         try {
             let config: any = {};
 
-            // 如果文件存在，先读取现有配置
+            // If file exists, read existing configuration first
             if (fs.existsSync(this.configPath)) {
                 const content = await fs.promises.readFile(this.configPath, 'utf8');
                 let parseSuccess = false;
@@ -54,7 +54,7 @@ export class ConfigReader {
                     config = JSON.parse(content);
                     parseSuccess = true;
                 } catch (e) {
-                    // 如果解析失败，重试两次
+                    // If parsing fails, retry twice
                     this.outputChannel.appendLine(`[ConfigReader] Failed to parse existing config, retrying...`);
                     for (let i = 0; i < 2; i++) {
                         try {
@@ -67,23 +67,23 @@ export class ConfigReader {
                     }
                 }
 
-                // 如果仍然失败，则写入空对象
+                // If still fails, write empty object
                 if (!parseSuccess) {
                     this.outputChannel.appendLine(`[ConfigReader] All parse attempts failed, using empty config object`);
                     config = {};
                 }
             }
 
-            // 设置权限字段
+            // Set permission field
             config.bypassPermissionsModeAccepted = value;
 
-            // 确保目录存在
+            // Ensure directory exists
             const dir = path.dirname(this.configPath);
             if (!fs.existsSync(dir)) {
                 await fs.promises.mkdir(dir, { recursive: true });
             }
 
-            // 写回文件（保持 2 空格缩进格式）
+            // Write back to file (maintain 2-space indentation format)
             await fs.promises.writeFile(
                 this.configPath,
                 JSON.stringify(config, null, 2),
@@ -102,17 +102,17 @@ export class ConfigReader {
     }
 
     /**
-     * 监听配置文件变化
+     * Monitor configuration file changes
      */
     watchConfigFile(callback: () => void): void {
-        // 保存回调
+        // Save callback
         this.watchCallback = callback;
 
-        // 使用 fs.watchFile 监听文件变化
-        // 测试表明这是最可靠的方法
+        // Use fs.watchFile to monitor file changes
+        // Testing shows this is the most reliable method
         fs.watchFile(this.configPath, { interval: 2000 }, (curr, prev) => {
             if (curr.mtime.getTime() !== prev.mtime.getTime()) {
-                // 文件变化时调用回调，日志在权限变化时才打印
+                // Call callback when file changes, logs are only printed when permissions change
                 callback();
             }
         });
@@ -123,10 +123,10 @@ export class ConfigReader {
     }
 
     /**
-     * 清理资源
+     * Clean up resources
      */
     dispose(): void {
-        // 停止监听文件
+        // Stop monitoring file
         if (this.watchCallback) {
             fs.unwatchFile(this.configPath);
             this.outputChannel.appendLine('[ConfigReader] Stopped watching config file');

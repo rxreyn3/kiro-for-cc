@@ -24,7 +24,7 @@ let permissionManager: PermissionManager;
 let agentManager: AgentManager;
 export let outputChannel: vscode.OutputChannel;
 
-// 导出 getter 函数供其他模块使用
+// Export getter function for use by other modules
 export function getPermissionManager(): PermissionManager {
     return permissionManager;
 }
@@ -43,7 +43,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window.showErrorMessage(`Failed to initialize prompt system: ${error}`);
     }
 
-    // 检查工作区状态
+    // Check workspace status
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders || workspaceFolders.length === 0) {
         outputChannel.appendLine('WARNING: No workspace folder found!');
@@ -53,10 +53,10 @@ export async function activate(context: vscode.ExtensionContext) {
     // Initialize Claude Code SDK provider with output channel
     claudeCodeProvider = new ClaudeCodeProvider(context, outputChannel);
 
-    // 创建并初始化 PermissionManager
+    // Create and initialize PermissionManager
     permissionManager = new PermissionManager(context, outputChannel);
 
-    // 初始化权限系统（包含重试逻辑）
+    // Initialize permission system (includes retry logic)
     await permissionManager.initializePermissions();
 
     // Initialize feature managers with output channel
@@ -107,7 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Register CodeLens provider for spec tasks
     const specTaskCodeLensProvider = new SpecTaskCodeLensProvider();
     
-    // 使用更明确的文档选择器
+    // Use more specific document selector
     const selector: vscode.DocumentSelector = [
         { 
             language: 'markdown', 
@@ -279,7 +279,7 @@ function registerCommands(context: vscode.ExtensionContext, specExplorer: SpecEx
         vscode.commands.registerCommand('kfc.spec.implTask', async (documentUri: vscode.Uri, lineNumber: number, taskDescription: string) => {
             outputChannel.appendLine(`[Task Execute] Line ${lineNumber + 1}: ${taskDescription}`);
 
-            // 更新任务状态为已完成
+            // Update task status to completed
             const document = await vscode.workspace.openTextDocument(documentUri);
             const edit = new vscode.WorkspaceEdit();
             const line = document.lineAt(lineNumber);
@@ -288,7 +288,7 @@ function registerCommands(context: vscode.ExtensionContext, specExplorer: SpecEx
             edit.replace(documentUri, range, newLine);
             await vscode.workspace.applyEdit(edit);
 
-            // 使用 Claude Code 执行任务
+            // Use Claude Code to execute task
             await specManager.implTask(documentUri.fsPath, taskDescription);
         }),
         vscode.commands.registerCommand('kfc.spec.refresh', async () => {
@@ -458,7 +458,7 @@ function registerCommands(context: vscode.ExtensionContext, specExplorer: SpecEx
 
         // Permission debug commands
         vscode.commands.registerCommand('kfc.permission.check', async () => {
-            // 使用新的 PermissionManager 检查真实的权限状态
+            // Use new PermissionManager to check real permission status
             const hasPermission = await permissionManager.checkPermission();
             const configPath = require('os').homedir() + '/.claude.json';
 

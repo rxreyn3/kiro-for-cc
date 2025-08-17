@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Prompt 快照测试 INT-15: create spec prompt 快照测试 1`] = `
+exports[`Prompt Snapshot Test INT-15: create spec prompt snapshot test 1`] = `
 "
 
 <system>
@@ -352,7 +352,7 @@ You have full control over the naming and file creation.
 "
 `;
 
-exports[`Prompt 快照测试 INT-16: init steering prompt 快照测试 1`] = `
+exports[`Prompt Snapshot Test INT-16: init steering prompt snapshot test 1`] = `
 "
 <system>
 You are analyzing a codebase to create steering documents that will guide AI assistants working on this project.
@@ -425,7 +425,7 @@ IMPORTANT:
 "
 `;
 
-exports[`Prompt 快照测试 INT-17: create custom steering prompt 快照测试 1`] = `
+exports[`Prompt Snapshot Test INT-17: create custom steering prompt snapshot test 1`] = `
 "
 <system>
 You are helping to create steering documents for a project. Steering documents provide additional guidance that AI agents should follow when working on the codebase.
@@ -457,7 +457,7 @@ Please:
 "
 `;
 
-exports[`Prompt 快照测试 INT-18: refine steering prompt 快照测试 1`] = `
+exports[`Prompt Snapshot Test INT-18: refine steering prompt snapshot test 1`] = `
 "
 <system>
 You are refining a steering document. The current content is provided below.
@@ -490,7 +490,7 @@ After refining, overwrite the original file with the improved content.
 "
 `;
 
-exports[`Prompt 快照测试 INT-19: delete steering prompt 快照测试 1`] = `
+exports[`Prompt Snapshot Test INT-19: delete steering prompt snapshot test 1`] = `
 "
 The steering document "deprecated-guidelines.md" has been deleted from /snapshot/test/.claude/steering.
 

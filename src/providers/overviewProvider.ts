@@ -16,7 +16,7 @@ export class OverviewProvider implements vscode.TreeDataProvider<OverviewItem> {
     
     async getChildren(element?: OverviewItem): Promise<OverviewItem[]> {
         if (!element) {
-            // 返回空数组以显示 viewsWelcome 内容
+            // Return empty array to display viewsWelcome content
             return [];
         }
         return [];

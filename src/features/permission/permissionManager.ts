@@ -16,41 +16,41 @@ export class PermissionManager {
         private context: vscode.ExtensionContext,
         private outputChannel: vscode.OutputChannel
     ) {
-        // 初始化 ConfigReader 和 PermissionCache
+        // Initialize ConfigReader and PermissionCache
         this.configReader = new ConfigReader(outputChannel);
         this.cache = new PermissionCache(this.configReader, outputChannel);
 
-        // 监听缓存的权限变更事件
+        // Listen for cache permission change events
         const eventDisposable = this.cache.event(async (hasPermission) => {
             this.outputChannel.appendLine(
                 `[PermissionManager] Event received with hasPermission: ${hasPermission}`
             );
             if (hasPermission) {
-                // 权限被授予
+                // Permission granted
                 this.outputChannel.appendLine(
                     '[PermissionManager] Permission granted detected, closing UI elements'
                 );
 
-                // 关闭所有 UI 元素
+                // Close all UI elements
                 this.outputChannel.appendLine('[PermissionManager] Permission granted, closing UI elements');
                 this.closeUIElements();
 
-                // 显示成功通知
+                // Show success notification
                 NotificationUtils.showAutoDismissNotification(
                     '✅ Claude Code permissions detected and verified!'
                 );
             } else {
-                // 权限被撤销
+                // Permission revoked
                 this.outputChannel.appendLine(
                     '[PermissionManager] Permission revoked detected, showing setup'
                 );
 
-                // 显示警告
+                // Show warning
                 vscode.window.showWarningMessage(
                     'Claude Code permissions have been revoked. Please grant permissions again.'
                 );
 
-                // 显示权限设置界面
+                // Show permission setup interface
                 await this.showPermissionSetup();
             }
         });
@@ -59,15 +59,15 @@ export class PermissionManager {
     }
 
     /**
-     * 初始化权限系统（扩展启动时调用）
+     * Initialize permission system (called when extension starts)
      */
     async initializePermissions(): Promise<boolean> {
         this.outputChannel.appendLine('[PermissionManager] Initializing permissions...');
 
-        // 总是启动文件监听，这样可以检测权限变化
+        // Always start file monitoring to detect permission changes
         this.startMonitoring();
 
-        // 调用 cache.refreshAndGet() 检查权限
+        // Call cache.refreshAndGet() to check permissions
         let hasPermission = await this.cache.refreshAndGet();
 
         if (hasPermission) {
@@ -75,15 +75,15 @@ export class PermissionManager {
             return true;
         }
 
-        // 如果无权限，先尝试显示设置界面
+        // If no permissions, try to show setup interface first
         this.outputChannel.appendLine('[PermissionManager] No permissions found, showing setup');
 
-        // 第一次直接显示权限设置
+        // Show permission setup directly first time
         hasPermission = await this.showPermissionSetup();
 
-        // 如果用户在 webview 中取消了，进入重试循环
+        // If user cancelled in webview, enter retry loop
         while (!hasPermission) {
-            // 显示警告并提供重试选项
+            // Show warning and provide retry options
             const retry = await vscode.window.showWarningMessage(
                 'Claude Code permissions not granted. The extension will not work. Please approve or uninstall.',
                 'Try Again',
@@ -91,16 +91,16 @@ export class PermissionManager {
             );
 
             if (retry === 'Try Again') {
-                // 再次调用权限设置流程
+                // Call permission setup flow again
                 const granted = await this.showPermissionSetup();
                 if (granted) {
                     hasPermission = true;
                 }
             } else if (retry === 'Uninstall') {
-                // 用户点击了 Uninstall
+                // User clicked Uninstall
                 this.outputChannel.appendLine('[PermissionManager] User chose to uninstall');
 
-                // 先显示确认对话框
+                // Show confirmation dialog first
                 const confirm = await vscode.window.showWarningMessage(
                     'Are you sure you want to uninstall Kiro for Claude Code?',
                     'Keep It',
@@ -109,7 +109,7 @@ export class PermissionManager {
 
                 if (confirm === 'Uninstall') {
                     try {
-                        // 执行卸载命令
+                        // Execute uninstall command
                         await vscode.commands.executeCommand('workbench.extensions.uninstallExtension', 'heisebaiyun.kiro-for-cc');
                         this.outputChannel.appendLine('[PermissionManager] Uninstall command executed');
                     } catch (error) {
@@ -126,24 +126,24 @@ export class PermissionManager {
     }
 
     /**
-     * 检查权限（使用缓存）
+     * Check permissions (using cache)
      */
     async checkPermission(): Promise<boolean> {
         return this.cache.get();
     }
 
     /**
-     * 授予权限（WebView 调用）
+     * Grant permission (called by WebView)
      */
     async grantPermission(): Promise<boolean> {
         try {
-            // 调用 ConfigReader 设置权限
+            // Call ConfigReader to set permission
             await this.configReader.setBypassPermission(true);
 
-            // 刷新缓存
+            // Refresh cache
             await this.cache.refresh();
 
-            // 记录日志
+            // Log action
             this.outputChannel.appendLine(
                 '[PermissionManager] Permission granted via WebView'
             );
@@ -158,7 +158,7 @@ export class PermissionManager {
     }
 
     /**
-     * 显示权限设置流程
+     * Show permission setup flow
      */
     async showPermissionSetup(): Promise<boolean> {
         return new Promise((resolve) => {
@@ -166,10 +166,10 @@ export class PermissionManager {
                 this.outputChannel.appendLine('[PermissionManager] Starting permission setup flow...');
                 this.outputChannel.appendLine('[PermissionManager] showPermissionSetup called');
 
-                // 调用 ClaudeCodeProvider.createPermissionTerminal() 创建终端
+                // Call ClaudeCodeProvider.createPermissionTerminal() to create terminal
                 this.currentTerminal = ClaudeCodeProvider.createPermissionTerminal();
 
-                // 创建 WebView 使用回调模式
+                // Create WebView using callback mode
                 PermissionWebview.createOrShow(
                     this.context,
                     {
@@ -177,7 +177,7 @@ export class PermissionManager {
                             this.outputChannel.appendLine('[PermissionManager] User accepted, granting permission');
                             const success = await this.grantPermission();
                             if (success) {
-                                // 关闭 UI 元素
+                                // Close UI elements
                                 this.closeUIElements();
                                 resolve(true);
                             }
@@ -185,13 +185,13 @@ export class PermissionManager {
                         },
                         onCancel: () => {
                             this.outputChannel.appendLine('[PermissionManager] User cancelled');
-                            // 关闭 UI 元素
+                            // Close UI elements
                             this.closeUIElements();
                             resolve(false);
                         },
                         onDispose: () => {
                             this.outputChannel.appendLine('[PermissionManager] WebView disposed');
-                            // 关闭其他 UI 元素
+                            // Close other UI elements
                             if (this.currentTerminal) {
                                 this.currentTerminal.dispose();
                                 this.currentTerminal = undefined;
@@ -202,7 +202,7 @@ export class PermissionManager {
                     this.outputChannel
                 );
 
-                // 保存 WebView 引用
+                // Save WebView reference
                 this.permissionWebview = PermissionWebview.currentPanel;
                 this.outputChannel.appendLine(
                     `[PermissionManager] WebView reference saved: ${this.permissionWebview ? 'Yes' : 'No'}`
@@ -217,18 +217,18 @@ export class PermissionManager {
     }
 
     /**
-     * 关闭所有 UI 元素
+     * Close all UI elements
      */
     private closeUIElements(): void {
         this.outputChannel.appendLine('[PermissionManager] Closing UI elements');
 
-        // 关闭 WebView
+        // Close WebView
         if (this.permissionWebview) {
             PermissionWebview.close();
             this.permissionWebview = undefined;
         }
 
-        // 关闭终端
+        // Close terminal
         if (this.currentTerminal) {
             this.currentTerminal.dispose();
             this.currentTerminal = undefined;
@@ -236,34 +236,34 @@ export class PermissionManager {
     }
 
     /**
-     * 启动文件监听
+     * Start file monitoring
      */
     startMonitoring(): void {
         this.outputChannel.appendLine('[PermissionManager] Starting file monitoring...');
 
-        // 调用 configReader.watchConfigFile()
+        // Call configReader.watchConfigFile()
         this.configReader.watchConfigFile(async () => {
-            // 文件变化时刷新缓存
+            // Refresh cache when file changes
             await this.cache.refresh();
         });
     }
 
     /**
-     * 重置权限状态（设置为 false）
+     * Reset permission status (set to false)
      */
     async resetPermission(): Promise<boolean> {
         try {
             this.outputChannel.appendLine('[PermissionManager] Resetting permission to false...');
 
-            // 调用 ConfigReader 设置权限为 false
+            // Call ConfigReader to set permission to false
             await this.configReader.setBypassPermission(false);
 
-            // 刷新缓存
+            // Refresh cache
             await this.cache.refresh();
 
             this.outputChannel.appendLine('[PermissionManager] Permission reset completed');
 
-            // 权限被重置后会触发事件，自动显示设置界面
+            // After permission is reset, event will be triggered and setup interface will be shown automatically
             return true;
         } catch (error) {
             this.outputChannel.appendLine(
@@ -274,16 +274,16 @@ export class PermissionManager {
     }
 
     /**
-     * 清理资源
+     * Clean up resources
      */
     dispose(): void {
-        // 清理所有 disposables
+        // Clean up all disposables
         this.disposables.forEach(d => d.dispose());
 
-        // 清理 ConfigReader
+        // Clean up ConfigReader
         this.configReader.dispose();
 
-        // 清理 WebView 和终端
+        // Clean up WebView and terminal
         if (this.permissionWebview) {
             this.permissionWebview.dispose();
         }

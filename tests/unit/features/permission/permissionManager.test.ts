@@ -86,8 +86,8 @@ describe('PermissionManager', () => {
         }
     });
 
-    describe('初始化和监控', () => {
-        it('PM-01: 初始化权限系统并启动监控', async () => {
+    describe('Initialization and Monitoring', () => {
+        it('PM-01: Initialize permission system and start monitoring', async () => {
             mockCache.refreshAndGet.mockResolvedValue(false);
             (PermissionWebview.createOrShow as jest.Mock).mockImplementation((ctx, callbacks) => {
                 // Simulate user accepting
@@ -107,7 +107,7 @@ describe('PermissionManager', () => {
             expect(result).toBe(true);
         });
 
-        it('PM-02: 有权限时初始化直接返回 true', async () => {
+        it('PM-02: Direct return true when permissions exist during initialization', async () => {
             mockCache.refreshAndGet.mockResolvedValue(true);
 
             permissionManager = new PermissionManager(mockContext, mockOutputChannel);
@@ -118,11 +118,11 @@ describe('PermissionManager', () => {
                 '[PermissionManager] Permissions already granted'
             );
             expect(PermissionWebview.createOrShow).not.toHaveBeenCalled();
-            // 仍然启动监控
+            // Still starts monitoring
             expect(mockConfigReader.watchConfigFile).toHaveBeenCalled();
         });
 
-        it('PM-03: 无权限时显示权限设置界面', async () => {
+        it('PM-03: Show permission setup interface when no permissions', async () => {
             mockCache.refreshAndGet.mockResolvedValue(false);
             let acceptCallback: () => Promise<boolean>;
 
@@ -146,12 +146,12 @@ describe('PermissionManager', () => {
         });
     });
 
-    describe('事件处理', () => {
+    describe('Event Handling', () => {
         beforeEach(() => {
             permissionManager = new PermissionManager(mockContext, mockOutputChannel);
         });
 
-        it('PM-04: 权限从 false 变为 true 时关闭 UI 并显示通知', async () => {
+        it('PM-04: Close UI and show notification when permission changes from false to true', async () => {
             // Set up mock webview and terminal
             (permissionManager as any).permissionWebview = { dispose: jest.fn() };
             (permissionManager as any).currentTerminal = mockTerminal;
@@ -169,7 +169,7 @@ describe('PermissionManager', () => {
             );
         });
 
-        it('PM-05: 权限从 true 变为 false 时显示警告和设置界面', async () => {
+        it('PM-05: Show warning and setup interface when permission changes from true to false', async () => {
             // Mock showPermissionSetup to resolve immediately
             (PermissionWebview.createOrShow as jest.Mock).mockImplementation((ctx, callbacks) => {
                 // Simulate immediate cancel to resolve the promise
@@ -193,12 +193,12 @@ describe('PermissionManager', () => {
         });
     });
 
-    describe('权限操作', () => {
+    describe('Permission Operations', () => {
         beforeEach(() => {
             permissionManager = new PermissionManager(mockContext, mockOutputChannel);
         });
 
-        it('PM-06: 检查权限使用缓存', async () => {
+        it('PM-06: Check permissions using cache', async () => {
             mockCache.get.mockResolvedValue(true);
 
             const result = await permissionManager.checkPermission();
@@ -208,7 +208,7 @@ describe('PermissionManager', () => {
             expect(mockConfigReader.getBypassPermissionStatus).not.toHaveBeenCalled();
         });
 
-        it('PM-07: 授予权限更新配置和缓存', async () => {
+        it('PM-07: Grant permission updates config and cache', async () => {
             const result = await permissionManager.grantPermission();
 
             expect(mockConfigReader.setBypassPermission).toHaveBeenCalledWith(true);
@@ -219,7 +219,7 @@ describe('PermissionManager', () => {
             );
         });
 
-        it('PM-07-2: 授予权限失败时返回 false', async () => {
+        it('PM-07-2: Return false when granting permission fails', async () => {
             const error = new Error('Failed to write config');
             mockConfigReader.setBypassPermission.mockRejectedValue(error);
 
@@ -231,7 +231,7 @@ describe('PermissionManager', () => {
             );
         });
 
-        it('PM-10: 重置权限触发事件并显示设置界面', async () => {
+        it('PM-10: Reset permission triggers event and shows setup interface', async () => {
             const result = await permissionManager.resetPermission();
 
             expect(mockConfigReader.setBypassPermission).toHaveBeenCalledWith(false);
@@ -243,8 +243,8 @@ describe('PermissionManager', () => {
         });
     });
 
-    describe('重试机制', () => {
-        it('PM-08: 重试机制处理权限拒绝', async () => {
+    describe('Retry Mechanism', () => {
+        it('PM-08: Retry mechanism handles permission denial', async () => {
             mockCache.refreshAndGet.mockResolvedValue(false);
             let cancelCallback: () => void;
             let acceptCallback: () => Promise<boolean>;
@@ -284,7 +284,7 @@ describe('PermissionManager', () => {
             expect(result).toBe(true);
         });
 
-        it('PM-09: 用户选择卸载扩展', async () => {
+        it('PM-09: User chooses to uninstall extension', async () => {
             mockCache.refreshAndGet.mockResolvedValue(false);
 
             (PermissionWebview.createOrShow as jest.Mock).mockImplementation((ctx, callbacks) => {
@@ -310,8 +310,8 @@ describe('PermissionManager', () => {
         });
     });
 
-    describe('UI 管理', () => {
-        it('PM-UI-01: 正确管理 WebView 引用', () => {
+    describe('UI Management', () => {
+        it('PM-UI-01: Correctly manage WebView references', () => {
             const mockPanel = { dispose: jest.fn() };
 
             // Mock PermissionWebview.currentPanel getter
@@ -337,7 +337,7 @@ describe('PermissionManager', () => {
             promise.then(() => { });
         });
 
-        it('PM-UI-02: showPermissionSetup 处理错误', async () => {
+        it('PM-UI-02: showPermissionSetup handles errors', async () => {
             (ClaudeCodeProvider.createPermissionTerminal as jest.Mock).mockImplementation(() => {
                 throw new Error('Terminal creation failed');
             });
@@ -352,8 +352,8 @@ describe('PermissionManager', () => {
         });
     });
 
-    describe('资源清理', () => {
-        it('PM-11: dispose 清理所有资源', () => {
+    describe('Resource Cleanup', () => {
+        it('PM-11: dispose cleans up all resources', () => {
             const mockWebview = { dispose: jest.fn() };
             const mockDisposable = { dispose: jest.fn() };
 

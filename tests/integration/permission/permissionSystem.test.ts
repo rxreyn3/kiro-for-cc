@@ -30,7 +30,7 @@ jest.mock('os');
 jest.mock('../../../src/features/permission/permissionWebview');
 jest.mock('../../../src/providers/claudeCodeProvider');
 
-describe('权限系统集成测试', () => {
+describe('Permission System Integration Tests', () => {
     let mockConfigPath: string;
     let mockContext: vscode.ExtensionContext;
     let mockOutputChannel: vscode.OutputChannel;
@@ -126,8 +126,8 @@ describe('权限系统集成测试', () => {
         jest.clearAllMocks();
     });
 
-    describe('IS-01: 权限授予完整流程', () => {
-        it('IS-01: 从 UI 接受到文件写入的完整流程', async () => {
+    describe('IS-01: Complete Permission Granting Flow', () => {
+        it('IS-01: Complete flow from UI acceptance to file writing', async () => {
             // Create real components
             configReader = new ConfigReader(mockOutputChannel);
             permissionCache = new PermissionCache(configReader, mockOutputChannel);
@@ -167,8 +167,8 @@ describe('权限系统集成测试', () => {
         });
     });
 
-    describe('IS-02: 文件变化触发缓存更新', () => {
-        it('IS-02: 文件监控检测变化并更新缓存', async () => {
+    describe('IS-02: File Changes Trigger Cache Updates', () => {
+        it('IS-02: File monitoring detects changes and updates cache', async () => {
             // Create initial config file
             mockFileContent[mockConfigPath] = JSON.stringify({ bypassPermissionsModeAccepted: false });
 
@@ -218,8 +218,8 @@ describe('权限系统集成测试', () => {
         });
     });
 
-    describe('IS-03: 权限撤销触发 UI', () => {
-        it('IS-03: 权限撤销的核心功能', async () => {
+    describe('IS-03: Permission Revocation Triggers UI', () => {
+        it('IS-03: Core functionality of permission revocation', async () => {
             // Create initial config with permission
             mockFileContent[mockConfigPath] = JSON.stringify({ bypassPermissionsModeAccepted: true });
 
@@ -254,8 +254,8 @@ describe('权限系统集成测试', () => {
         });
     });
 
-    describe('IS-04: 配置文件损坏恢复', () => {
-        it('IS-04: 处理损坏的配置文件并恢复', async () => {
+    describe('IS-04: Corrupted Config File Recovery', () => {
+        it('IS-04: Handle corrupted config file and recover', async () => {
             // Create corrupted config file
             mockFileContent[mockConfigPath] = '{ invalid json }';
 
@@ -279,7 +279,7 @@ describe('权限系统集成测试', () => {
             expect(newValue).toBe(true);
         });
 
-        it('IS-04-2: 保留有效字段修复部分损坏', async () => {
+        it('IS-04-2: Preserve valid fields when repairing partial corruption', async () => {
             // Create partially valid config
             const partialConfig = {
                 bypassPermissionsModeAccepted: 'invalid', // Wrong type
@@ -306,8 +306,8 @@ describe('权限系统集成测试', () => {
         });
     });
 
-    describe('IS-05: 多监听器协同', () => {
-        it('IS-05: 多个监听器响应同一权限变化', async () => {
+    describe('IS-05: Multiple Listeners Collaboration', () => {
+        it('IS-05: Multiple listeners respond to same permission change', async () => {
             // Create components
             configReader = new ConfigReader(mockOutputChannel);
             permissionCache = new PermissionCache(configReader, mockOutputChannel);
@@ -336,8 +336,8 @@ describe('权限系统集成测试', () => {
         });
     });
 
-    describe('IS-06: 初始化流程', () => {
-        it('IS-06: 文件不存在时的完整初始化', async () => {
+    describe('IS-06: Initialization Flow', () => {
+        it('IS-06: Complete initialization when file does not exist', async () => {
             // Ensure no config file
             expect(mockFileContent[mockConfigPath]).toBeUndefined();
 
@@ -366,8 +366,8 @@ describe('权限系统集成测试', () => {
         });
     });
 
-    describe('IS-07: 并发操作', () => {
-        it('IS-07: 并发读写操作的数据一致性', async () => {
+    describe('IS-07: Concurrent Operations', () => {
+        it('IS-07: Data consistency under concurrent read/write operations', async () => {
             // Create components
             configReader = new ConfigReader(mockOutputChannel);
             permissionCache = new PermissionCache(configReader, mockOutputChannel);
@@ -401,8 +401,8 @@ describe('权限系统集成测试', () => {
         });
     });
 
-    describe('IS-08: 生命周期管理', () => {
-        it('IS-08: 组件创建使用和销毁的完整周期', async () => {
+    describe('IS-08: Lifecycle Management', () => {
+        it('IS-08: Complete cycle of component creation, usage and destruction', async () => {
             // Create components
             configReader = new ConfigReader(mockOutputChannel);
             permissionCache = new PermissionCache(configReader, mockOutputChannel);

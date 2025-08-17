@@ -5,7 +5,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/notdp/kiro-for-cc.svg?style=flat-square)](https://github.com/notdp/kiro-for-cc/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/notdp/kiro-for-cc.svg?style=flat-square)](https://github.com/notdp/kiro-for-cc/issues)
 
-[中文版](./README.zh-CN.md)
+[Chinese Version](./README.zh-CN.md)
 
 > [!IMPORTANT]
 > **🎉 New: Sub Agent Support Now Available!**  

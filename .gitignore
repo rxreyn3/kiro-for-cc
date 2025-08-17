@@ -13,7 +13,7 @@ out/
 !.vscode/settings.json
 !.vscode/tasks.json
 
-# 测试相关
+# Test related
 coverage/
 *.snap.tmp
 .nyc_output/

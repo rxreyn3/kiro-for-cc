@@ -1,255 +1,255 @@
-# 权限系统集成测试用例
+# Permission System Integration Test Cases
 
-## 测试文件
+## Test File
 
 `permissionSystem.test.ts`
 
-## 测试目的
+## Test Purpose
 
-验证权限系统中多个组件（ConfigReader、PermissionCache、PermissionManager）协同工作的正确性。集成测试减少 Mock 使用，测试真实的组件交互和数据流。
+Verify the correct collaboration of multiple components (ConfigReader, PermissionCache, PermissionManager) in the permission system. Integration tests reduce Mock usage and test real component interactions and data flow.
 
-## 测试用例概览
+## Test Case Overview
 
-| 用例 ID | 功能描述                     | 测试类型 |
-| ------- | ---------------------------- | -------- |
-| IS-01   | 权限授予完整流程             | 正向测试 |
-| IS-02   | 文件变化触发缓存更新和事件   | 正向测试 |
-| IS-03   | 权限撤销触发 UI 显示         | 正向测试 |
-| IS-04   | 配置文件损坏时的恢复机制     | 异常测试 |
-| IS-05   | 多个监听器协同响应权限变化   | 正向测试 |
-| IS-06   | 初始化时文件不存在的完整流程 | 正向测试 |
-| IS-07   | 并发操作的数据一致性         | 性能测试 |
-| IS-08   | 组件生命周期管理             | 正向测试 |
+| Case ID | Function Description                    | Test Type        |
+| ------- | --------------------------------------- | ---------------- |
+| IS-01   | Complete permission granting flow       | Positive Test    |
+| IS-02   | File changes trigger cache updates and events | Positive Test |
+| IS-03   | Permission revocation triggers UI display | Positive Test |
+| IS-04   | Recovery mechanism for corrupted config files | Exception Test |
+| IS-05   | Multiple listeners respond to permission changes | Positive Test |
+| IS-06   | Complete initialization flow when file doesn't exist | Positive Test |
+| IS-07   | Data consistency under concurrent operations | Performance Test |
+| IS-08   | Component lifecycle management          | Positive Test    |
 
-## 详细测试步骤
+## Detailed Test Steps
 
-### IS-01: 权限授予完整流程
+### IS-01: Complete Permission Granting Flow
 
-**测试目的**: 验证从 UI 接受到文件写入的完整权限授予流程
+**Test Purpose**: Verify the complete permission granting flow from UI acceptance to file writing
 
-**准备数据**:
+**Test Data**:
 
-- 使用临时目录模拟用户主目录
-- 初始状态无权限
+- Use temporary directory to simulate user home directory
+- Initial state has no permissions
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建真实的 ConfigReader、PermissionCache 和 PermissionManager
-2. 调用 PermissionManager.grantPermission()
-3. 验证文件被写入
-4. 验证缓存更新
-5. 验证事件触发
+1. Create real ConfigReader, PermissionCache and PermissionManager
+2. Call PermissionManager.grantPermission()
+3. Verify file is written
+4. Verify cache is updated
+5. Verify events are triggered
 
-**预期结果**:
+**Expected Results**:
 
-- 配置文件被创建，内容正确
-- 缓存返回 true
-- 权限变化事件被触发
-- 各组件日志输出正确
+- Configuration file is created with correct content
+- Cache returns true
+- Permission change events are triggered
+- Component logs output correctly
 
-### IS-02: 文件变化触发缓存更新和事件
+### IS-02: File Changes Trigger Cache Updates and Events
 
-**测试目的**: 验证文件监控机制的完整工作流程
+**Test Purpose**: Verify the complete workflow of file monitoring mechanism
 
-**准备数据**:
+**Test Data**:
 
-- 创建初始配置文件（权限为 false）
-- 设置文件监控
+- Create initial config file (permission set to false)
+- Set up file monitoring
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建组件并启动监控
-2. 注册事件监听器
-3. 外部修改配置文件（权限改为 true）
-4. 等待文件监控触发
-5. 验证事件链
+1. Create components and start monitoring
+2. Register event listeners
+3. Externally modify config file (change permission to true)
+4. Wait for file monitoring to trigger
+5. Verify event chain
 
-**预期结果**:
+**Expected Results**:
 
-- ConfigReader 检测到文件变化
-- PermissionCache 自动刷新
-- PermissionManager 接收到事件
-- UI 相关方法被调用
+- ConfigReader detects file changes
+- PermissionCache automatically refreshes
+- PermissionManager receives events
+- UI-related methods are called
 
-### IS-03: 权限撤销触发 UI 显示
+### IS-03: Permission Revocation Triggers UI Display
 
-**测试目的**: 验证权限被撤销时的完整响应流程
+**Test Purpose**: Verify the complete response flow when permissions are revoked
 
-**准备数据**:
+**Test Data**:
 
-- 初始权限为 true
-- Mock UI 组件（WebView 和 Terminal）
+- Initial permission set to true
+- Mock UI components (WebView and Terminal)
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建组件并设置初始权限
-2. 调用 resetPermission()
-3. 验证文件更新
-4. 验证事件触发
-5. 验证 UI 调用
+1. Create components and set initial permissions
+2. Call resetPermission()
+3. Verify file updates
+4. Verify events are triggered
+5. Verify UI calls
 
-**预期结果**:
+**Expected Results**:
 
-- 配置文件权限字段变为 false
-- 触发权限撤销事件
-- 显示警告消息
-- 创建权限设置 UI
+- Config file permission field changes to false
+- Permission revocation event is triggered
+- Warning message is displayed
+- Permission settings UI is created
 
-### IS-04: 配置文件损坏时的恢复机制
+### IS-04: Recovery Mechanism for Corrupted Config Files
 
-**测试目的**: 验证系统对损坏配置文件的处理能力
+**Test Purpose**: Verify the system's ability to handle corrupted configuration files
 
-**准备数据**:
+**Test Data**:
 
-- 创建包含无效 JSON 的配置文件
-- 设置各种损坏场景
+- Create configuration file containing invalid JSON
+- Set up various corruption scenarios
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建损坏的配置文件
-2. 初始化权限系统
-3. 尝试授予权限
-4. 验证文件被修复
-5. 验证系统正常工作
+1. Create corrupted configuration file
+2. Initialize permission system
+3. Attempt to grant permissions
+4. Verify file is repaired
+5. Verify system works normally
 
-**预期结果**:
+**Expected Results**:
 
-- 读取时返回 false（安全默认值）
-- 写入时保留有效字段
-- 无效内容被忽略
-- 系统继续正常运行
+- Reading returns false (safe default value)
+- Writing preserves valid fields
+- Invalid content is ignored
+- System continues to run normally
 
-### IS-05: 多个监听器协同响应权限变化
+### IS-05: Multiple Listeners Respond to Permission Changes
 
-**测试目的**: 验证多个组件监听同一事件源的协同工作
+**Test Purpose**: Verify collaborative work of multiple components listening to the same event source
 
-**准备数据**:
+**Test Data**:
 
-- 创建多个事件监听器
-- 模拟不同的响应动作
+- Create multiple event listeners
+- Simulate different response actions
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建权限系统
-2. 注册多个监听器（模拟不同组件）
-3. 触发权限变化
-4. 验证所有监听器响应
-5. 验证执行顺序
+1. Create permission system
+2. Register multiple listeners (simulate different components)
+3. Trigger permission changes
+4. Verify all listeners respond
+5. Verify execution order
 
-**预期结果**:
+**Expected Results**:
 
-- 所有监听器接收到事件
-- 执行顺序符合预期
-- 没有竞态条件
-- 日志记录完整
+- All listeners receive events
+- Execution order meets expectations
+- No race conditions
+- Complete log recording
 
-### IS-06: 初始化时文件不存在的完整流程
+### IS-06: Complete Initialization Flow When File Doesn't Exist
 
-**测试目的**: 验证首次使用时的完整初始化流程
+**Test Purpose**: Verify the complete initialization flow for first-time use
 
-**准备数据**:
+**Test Data**:
 
-- 确保配置文件不存在
-- Mock UI 交互
+- Ensure configuration file doesn't exist
+- Mock UI interactions
 
-**测试步骤**:
+**Test Steps**:
 
-1. 删除配置文件（如果存在）
-2. 创建权限系统
-3. 调用 initializePermissions()
-4. 模拟用户接受权限
-5. 验证文件创建
+1. Delete configuration file (if exists)
+2. Create permission system
+3. Call initializePermissions()
+4. Simulate user accepting permissions
+5. Verify file creation
 
-**预期结果**:
+**Expected Results**:
 
-- 显示权限设置 UI
-- 用户接受后创建配置文件
-- 目录自动创建
-- 权限状态正确保存
+- Display permission settings UI
+- Create configuration file after user acceptance
+- Directory is automatically created
+- Permission state is correctly saved
 
-### IS-07: 并发操作的数据一致性
+### IS-07: Data Consistency Under Concurrent Operations
 
-**测试目的**: 验证并发读写时的数据一致性
+**Test Purpose**: Verify data consistency during concurrent read/write operations
 
-**准备数据**:
+**Test Data**:
 
-- 准备并发操作场景
-- 设置多个操作源
+- Prepare concurrent operation scenarios
+- Set up multiple operation sources
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建权限系统
-2. 同时触发多个操作：
-   - 读取权限状态
-   - 写入权限状态
-   - 刷新缓存
-3. 等待所有操作完成
-4. 验证最终状态
+1. Create permission system
+2. Trigger multiple operations simultaneously:
+   - Read permission state
+   - Write permission state
+   - Refresh cache
+3. Wait for all operations to complete
+4. Verify final state
 
-**预期结果**:
+**Expected Results**:
 
-- 所有操作成功完成
-- 最终状态一致
-- 没有数据竞态
-- 缓存与文件同步
+- All operations complete successfully
+- Final state is consistent
+- No data race conditions
+- Cache and file are synchronized
 
-### IS-08: 组件生命周期管理
+### IS-08: Component Lifecycle Management
 
-**测试目的**: 验证组件创建、使用和销毁的完整生命周期
+**Test Purpose**: Verify the complete lifecycle of component creation, usage, and destruction
 
-**准备数据**:
+**Test Data**:
 
-- 创建完整的权限系统
-- 设置各种资源（监听器、文件监控等）
+- Create complete permission system
+- Set up various resources (listeners, file monitoring, etc.)
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建所有组件
-2. 执行各种操作
-3. 调用 dispose() 方法
-4. 验证资源清理
-5. 尝试使用已销毁的组件
+1. Create all components
+2. Execute various operations
+3. Call dispose() method
+4. Verify resource cleanup
+5. Attempt to use destroyed components
 
-**预期结果**:
+**Expected Results**:
 
-- 所有资源被正确清理
-- 文件监控停止
-- 事件监听器移除
-- 后续调用不会导致错误
+- All resources are properly cleaned up
+- File monitoring stops
+- Event listeners are removed
+- Subsequent calls do not cause errors
 
-## 测试注意事项
+## Test Considerations
 
-### Mock 策略
+### Mock Strategy
 
-- 仅 Mock 必要的外部依赖（如 vscode UI 组件）
-- 使用真实的文件系统（临时目录）
-- 使用真实的组件实例
-- 保留组件间的真实交互
+- Only mock necessary external dependencies (such as vscode UI components)
+- Use real file system (temporary directory)
+- Use real component instances
+- Preserve real interactions between components
 
-### 文件系统
+### File System
 
-- 使用临时目录避免污染真实环境
-- 每个测试后清理临时文件
-- 模拟真实的文件路径结构
-- 测试文件权限问题
+- Use temporary directory to avoid polluting real environment
+- Clean up temporary files after each test
+- Simulate real file path structure
+- Test file permission issues
 
-### 异步处理
+### Async Handling
 
-- 文件监控需要等待
-- 使用适当的延迟等待文件系统事件
-- 避免使用固定延迟，使用事件驱动
-- 正确处理 Promise 链
+- File monitoring requires waiting
+- Use appropriate delays to wait for file system events
+- Avoid using fixed delays, use event-driven approach
+- Handle Promise chains correctly
 
-### 事件同步
+### Event Synchronization
 
-- 确保事件按预期顺序触发
-- 避免事件丢失
-- 处理异步事件的时序问题
-- 验证事件参数正确
+- Ensure events trigger in expected order
+- Avoid event loss
+- Handle timing issues of async events
+- Verify event parameters are correct
 
-### 错误边界
+### Error Boundaries
 
-- 测试各种错误场景
-- 验证错误不会破坏系统状态
-- 确保错误被正确记录
-- 验证错误恢复机制
+- Test various error scenarios
+- Verify errors don't break system state
+- Ensure errors are properly logged
+- Verify error recovery mechanisms

@@ -39,7 +39,7 @@ describe('PermissionCache', () => {
     });
 
     describe('Cache Management', () => {
-        it('PC-01: 首次获取权限状态（无缓存）', async () => {
+        it('PC-01: First time get permission status (no cache)', async () => {
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(true);
 
             const result = await permissionCache.get();
@@ -48,7 +48,7 @@ describe('PermissionCache', () => {
             expect(result).toBe(true);
         });
 
-        it('PC-02: 从缓存获取权限状态', async () => {
+        it('PC-02: Get permission status from cache', async () => {
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(true);
 
             // First call
@@ -61,7 +61,7 @@ describe('PermissionCache', () => {
             expect(result2).toBe(true);
         });
 
-        it('PC-03: 刷新缓存（不返回值）', async () => {
+        it('PC-03: Refresh cache (no return value)', async () => {
             // Initial value
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(false);
             await permissionCache.get();
@@ -76,7 +76,7 @@ describe('PermissionCache', () => {
             expect(mockConfigReader.getBypassPermissionStatus).toHaveBeenCalledTimes(2);
         });
 
-        it('PC-04: 刷新并获取最新状态', async () => {
+        it('PC-04: Refresh and get latest status', async () => {
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(true);
 
             const result = await permissionCache.refreshAndGet();
@@ -87,7 +87,7 @@ describe('PermissionCache', () => {
     });
 
     describe('Event System', () => {
-        it('PC-05: 权限从 false 变为 true 触发事件', async () => {
+        it('PC-05: Permission change from false to true triggers event', async () => {
             const eventSpy = jest.fn();
             eventListeners.push(eventSpy);
 
@@ -108,7 +108,7 @@ describe('PermissionCache', () => {
             );
         });
 
-        it('PC-06: 权限从 true 变为 false 触发事件', async () => {
+        it('PC-06: Permission change from true to false triggers event', async () => {
             const eventSpy = jest.fn();
             eventListeners.push(eventSpy);
 
@@ -129,7 +129,7 @@ describe('PermissionCache', () => {
             );
         });
 
-        it('PC-07: 权限状态不变时不触发事件', async () => {
+        it('PC-07: No event triggered when permission state unchanged', async () => {
             const eventSpy = jest.fn();
             eventListeners.push(eventSpy);
 
@@ -149,7 +149,7 @@ describe('PermissionCache', () => {
             );
         });
 
-        it('PC-10: 事件监听器正确接收权限变化', async () => {
+        it('PC-10: Event listeners correctly receive permission changes', async () => {
             const listener1 = jest.fn();
             const listener2 = jest.fn();
             const listener3 = jest.fn();
@@ -171,7 +171,7 @@ describe('PermissionCache', () => {
     });
 
     describe('Performance', () => {
-        it('PC-08: 多次连续调用 get 使用缓存', async () => {
+        it('PC-08: Multiple consecutive get calls use cache', async () => {
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(true);
 
             // First call to establish cache
@@ -191,13 +191,13 @@ describe('PermissionCache', () => {
     });
 
     describe('Error Handling', () => {
-        it('PC-09: ConfigReader 读取失败时传播错误', async () => {
+        it('PC-09: ConfigReader read failure propagates error', async () => {
             mockConfigReader.getBypassPermissionStatus.mockRejectedValue(new Error('File read error'));
 
             await expect(permissionCache.get()).rejects.toThrow('File read error');
         });
 
-        it('PC-09: 刷新时 ConfigReader 错误的处理', async () => {
+        it('PC-09: Handle ConfigReader error during refresh', async () => {
             // Initial successful read
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(true);
             await permissionCache.get();
@@ -210,7 +210,7 @@ describe('PermissionCache', () => {
     });
 
     describe('Edge Cases', () => {
-        it('PC-01-2: 将 undefined 缓存视为需要获取', async () => {
+        it('PC-01-2: Treat undefined cache as needing fetch', async () => {
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(false);
 
             // First call with undefined cache
@@ -220,7 +220,7 @@ describe('PermissionCache', () => {
             expect(result).toBe(false);
         });
 
-        it('PC-02-2: 正确缓存 false 值', async () => {
+        it('PC-02-2: Correctly cache false value', async () => {
             mockConfigReader.getBypassPermissionStatus.mockResolvedValue(false);
 
             // First call
@@ -232,7 +232,7 @@ describe('PermissionCache', () => {
             expect(result).toBe(false);
         });
 
-        it('PC-05/06: 处理快速权限变化', async () => {
+        it('PC-05/06: Handle rapid permission changes', async () => {
             const eventSpy = jest.fn();
             eventListeners.push(eventSpy);
 
@@ -257,7 +257,7 @@ describe('PermissionCache', () => {
     });
 
     describe('Interface Compliance', () => {
-        it('IPC-01: 实现 IPermissionCache 接口', () => {
+        it('IPC-01: Implement IPermissionCache interface', () => {
             expect(permissionCache.get).toBeDefined();
             expect(permissionCache.refresh).toBeDefined();
             expect(permissionCache.refreshAndGet).toBeDefined();
@@ -266,7 +266,7 @@ describe('PermissionCache', () => {
             expect(permissionCache.dispose).toBeDefined();
         });
 
-        it('IPC-02: 继承 vscode.EventEmitter', () => {
+        it('IPC-02: Inherit from vscode.EventEmitter', () => {
             expect(permissionCache).toBeInstanceOf(vscode.EventEmitter);
         });
     });

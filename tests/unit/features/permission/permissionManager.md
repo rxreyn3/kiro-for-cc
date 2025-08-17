@@ -1,286 +1,286 @@
-# PermissionManager 单元测试用例
+# PermissionManager Unit Test Cases
 
-## 测试文件
+## Test File
 
 `permissionManager.test.ts`
 
-## 测试目的
+## Test Purpose
 
-确保 PermissionManager 服务正确管理权限系统的整体流程，包括权限初始化、权限检查、权限授予、UI 管理、事件处理等核心功能。该模块是权限系统的核心管理器，协调其他组件完成权限验证流程。
+Ensure PermissionManager service correctly manages the overall permission system workflow, including permission initialization, permission checking, permission granting, UI management, event handling, and other core functions. This module is the core manager of the permission system, coordinating other components to complete the permission verification process.
 
-## 测试用例概览
+## Test Case Overview
 
-| 用例 ID | 功能描述                                    | 测试类型 |
-| ------- | ------------------------------------------- | -------- |
-| PM-01   | 初始化权限系统并启动监控                    | 正向测试 |
-| PM-02   | 有权限时初始化直接返回 true                 | 正向测试 |
-| PM-03   | 无权限时显示权限设置界面                    | 正向测试 |
-| PM-04   | 权限从 false 变为 true 时关闭 UI 并显示通知 | 正向测试 |
-| PM-05   | 权限从 true 变为 false 时显示警告和设置界面 | 正向测试 |
-| PM-06   | 检查权限使用缓存                            | 正向测试 |
-| PM-07   | 授予权限更新配置和缓存                      | 正向测试 |
-| PM-08   | 重试机制处理权限拒绝                        | 正向测试 |
-| PM-09   | 用户选择卸载扩展                            | 正向测试 |
-| PM-10   | 重置权限触发事件并显示设置界面              | 正向测试 |
+| Case ID | Function Description                                            | Test Type      |
+| ------- | --------------------------------------------------------------- | -------------- |
+| PM-01   | Initialize permission system and start monitoring              | Positive Test  |
+| PM-02   | Direct return true when permissions exist during initialization| Positive Test  |
+| PM-03   | Show permission setup interface when no permissions            | Positive Test  |
+| PM-04   | Close UI and show notification when permission changes from false to true | Positive Test |
+| PM-05   | Show warning and setup interface when permission changes from true to false | Positive Test |
+| PM-06   | Check permissions using cache                                   | Positive Test  |
+| PM-07   | Grant permission updates config and cache                       | Positive Test  |
+| PM-08   | Retry mechanism handles permission denial                       | Positive Test  |
+| PM-09   | User chooses to uninstall extension                            | Positive Test  |
+| PM-10   | Reset permission triggers event and shows setup interface      | Positive Test  |
 
-## 详细测试步骤
+## Detailed Test Steps
 
-### PM-01: 初始化权限系统并启动监控
+### PM-01: Initialize Permission System and Start Monitoring
 
-**测试目的**: 验证权限系统初始化时启动文件监控
+**Test Purpose**: Verify file monitoring is started during permission system initialization
 
-**准备数据**:
+**Test Data**:
 
-- Mock PermissionCache 返回 false
+- Mock PermissionCache returns false
 - Mock ConfigReader.watchConfigFile
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 调用 `initializePermissions()`
-3. 验证监控启动
-4. 验证缓存刷新被调用
+1. Create PermissionManager instance
+2. Call `initializePermissions()`
+3. Verify monitoring starts
+4. Verify cache refresh is called
 
-**预期结果**:
+**Expected Results**:
 
-- `startMonitoring()` 被调用
-- ConfigReader.watchConfigFile 被调用
-- 日志包含: `[PermissionManager] Initializing permissions...`
-- 日志包含: `[PermissionManager] Starting file monitoring...`
+- `startMonitoring()` is called
+- ConfigReader.watchConfigFile is called
+- Log contains: `[PermissionManager] Initializing permissions...`
+- Log contains: `[PermissionManager] Starting file monitoring...`
 
-### PM-02: 有权限时初始化直接返回 true
+### PM-02: Direct Return True When Permissions Exist During Initialization
 
-**测试目的**: 验证已有权限时快速返回
+**Test Purpose**: Verify quick return when permissions already exist
 
-**准备数据**:
+**Test Data**:
 
-- Mock cache.refreshAndGet 返回 true
+- Mock cache.refreshAndGet returns true
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 调用 `initializePermissions()`
-3. 验证返回值和流程
+1. Create PermissionManager instance
+2. Call `initializePermissions()`
+3. Verify return value and flow
 
-**预期结果**:
+**Expected Results**:
 
-- 返回 `true`
-- 不显示权限设置界面
-- 日志包含: `[PermissionManager] Permissions already granted`
-- 仍然启动文件监控
+- Returns `true`
+- Does not show permission setup interface
+- Log contains: `[PermissionManager] Permissions already granted`
+- Still starts file monitoring
 
-### PM-03: 无权限时显示权限设置界面
+### PM-03: Show Permission Setup Interface When No Permissions
 
-**测试目的**: 验证无权限时的完整设置流程
+**Test Purpose**: Verify complete setup flow when no permissions exist
 
-**准备数据**:
+**Test Data**:
 
-- Mock cache.refreshAndGet 返回 false
-- Mock showPermissionSetup 返回 true
+- Mock cache.refreshAndGet returns false
+- Mock showPermissionSetup returns true
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 调用 `initializePermissions()`
-3. 验证权限设置流程
+1. Create PermissionManager instance
+2. Call `initializePermissions()`
+3. Verify permission setup flow
 
-**预期结果**:
+**Expected Results**:
 
-- `showPermissionSetup()` 被调用
-- 创建权限终端
-- 创建权限 WebView
-- 最终返回 `true`
+- `showPermissionSetup()` is called
+- Creates permission terminal
+- Creates permission WebView
+- Finally returns `true`
 
-### PM-04: 权限从 false 变为 true 时关闭 UI 并显示通知
+### PM-04: Close UI and Show Notification When Permission Changes from False to True
 
-**测试目的**: 验证权限授予时的事件处理
+**Test Purpose**: Verify event handling when permission is granted
 
-**准备数据**:
+**Test Data**:
 
-- 设置事件监听器
-- 模拟权限变化事件
+- Set up event listeners
+- Mock permission change event
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 触发缓存事件，参数为 true
-3. 验证 UI 关闭和通知
+1. Create PermissionManager instance
+2. Trigger cache event with parameter true
+3. Verify UI closure and notification
 
-**预期结果**:
+**Expected Results**:
 
-- `closeUIElements()` 被调用
-- WebView 被关闭
-- 终端被关闭
-- 显示成功通知: `✅ Claude Code permissions detected and verified!`
+- `closeUIElements()` is called
+- WebView is closed
+- Terminal is closed
+- Shows success notification: `✅ Claude Code permissions detected and verified!`
 
-### PM-05: 权限从 true 变为 false 时显示警告和设置界面
+### PM-05: Show Warning and Setup Interface When Permission Changes from True to False
 
-**测试目的**: 验证权限撤销时的事件处理
+**Test Purpose**: Verify event handling when permission is revoked
 
-**准备数据**:
+**Test Data**:
 
-- 设置事件监听器
-- 模拟权限撤销事件
+- Set up event listeners
+- Mock permission revoke event
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 触发缓存事件，参数为 false
-3. 验证警告和设置界面
+1. Create PermissionManager instance
+2. Trigger cache event with parameter false
+3. Verify warning and setup interface
 
-**预期结果**:
+**Expected Results**:
 
-- 显示警告消息: `Claude Code permissions have been revoked...`
-- `showPermissionSetup()` 被调用
-- 日志包含: `[PermissionManager] Permission revoked detected`
+- Shows warning message: `Claude Code permissions have been revoked...`
+- `showPermissionSetup()` is called
+- Log contains: `[PermissionManager] Permission revoked detected`
 
-### PM-06: 检查权限使用缓存
+### PM-06: Check Permissions Using Cache
 
-**测试目的**: 验证权限检查直接使用缓存
+**Test Purpose**: Verify permission check directly uses cache
 
-**准备数据**:
+**Test Data**:
 
-- Mock cache.get 返回 true
+- Mock cache.get returns true
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 调用 `checkPermission()`
-3. 验证缓存调用
+1. Create PermissionManager instance
+2. Call `checkPermission()`
+3. Verify cache call
 
-**预期结果**:
+**Expected Results**:
 
-- cache.get() 被调用
-- 返回缓存的值
-- 不触发文件读取
+- cache.get() is called
+- Returns cached value
+- Does not trigger file reading
 
-### PM-07: 授予权限更新配置和缓存
+### PM-07: Grant Permission Updates Config and Cache
 
-**测试目的**: 验证权限授予的完整流程
+**Test Purpose**: Verify complete flow of permission granting
 
-**准备数据**:
+**Test Data**:
 
 - Mock ConfigReader.setBypassPermission
 - Mock cache.refresh
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 调用 `grantPermission()`
-3. 验证配置更新和缓存刷新
+1. Create PermissionManager instance
+2. Call `grantPermission()`
+3. Verify config update and cache refresh
 
-**预期结果**:
+**Expected Results**:
 
-- ConfigReader.setBypassPermission(true) 被调用
-- cache.refresh() 被调用
-- 返回 `true`
-- 日志包含: `[PermissionManager] Permission granted via WebView`
+- ConfigReader.setBypassPermission(true) is called
+- cache.refresh() is called
+- Returns `true`
+- Log contains: `[PermissionManager] Permission granted via WebView`
 
-### PM-08: 重试机制处理权限拒绝
+### PM-08: Retry Mechanism Handles Permission Denial
 
-**测试目的**: 验证用户拒绝权限后的重试流程
+**Test Purpose**: Verify retry flow after user denies permissions
 
-**准备数据**:
+**Test Data**:
 
-- Mock 初始权限为 false
-- Mock showPermissionSetup 第一次返回 false
-- Mock 用户选择 "Try Again"
-- Mock 第二次返回 true
+- Mock initial permission as false
+- Mock showPermissionSetup first time returns false
+- Mock user selects "Try Again"
+- Mock second time returns true
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 调用 `initializePermissions()`
-3. 模拟用户拒绝然后重试
-4. 验证重试流程
+1. Create PermissionManager instance
+2. Call `initializePermissions()`
+3. Simulate user denial then retry
+4. Verify retry flow
 
-**预期结果**:
+**Expected Results**:
 
-- 显示警告消息
-- 提供 "Try Again" 和 "Uninstall" 选项
-- 第二次调用 showPermissionSetup
-- 最终返回 `true`
+- Shows warning message
+- Provides "Try Again" and "Uninstall" options
+- Second call to showPermissionSetup
+- Finally returns `true`
 
-### PM-09: 用户选择卸载扩展
+### PM-09: User Chooses to Uninstall Extension
 
-**测试目的**: 验证用户选择卸载的流程
+**Test Purpose**: Verify flow when user chooses to uninstall
 
-**准备数据**:
+**Test Data**:
 
-- Mock 用户选择 "Uninstall"
-- Mock 确认对话框
+- Mock user selects "Uninstall"
+- Mock confirmation dialog
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 模拟无权限状态
-3. 用户选择卸载
-4. 确认卸载
+1. Create PermissionManager instance
+2. Simulate no permissions state
+3. User chooses uninstall
+4. Confirm uninstall
 
-**预期结果**:
+**Expected Results**:
 
-- 显示确认对话框
-- 执行卸载命令: `workbench.extensions.uninstallExtension`
-- 日志包含: `[PermissionManager] User chose to uninstall`
+- Shows confirmation dialog
+- Executes uninstall command: `workbench.extensions.uninstallExtension`
+- Log contains: `[PermissionManager] User chose to uninstall`
 
-### PM-10: 重置权限触发事件并显示设置界面
+### PM-10: Reset Permission Triggers Event and Shows Setup Interface
 
-**测试目的**: 验证权限重置功能
+**Test Purpose**: Verify permission reset functionality
 
-**准备数据**:
+**Test Data**:
 
 - Mock ConfigReader.setBypassPermission
 - Mock cache.refresh
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionManager 实例
-2. 调用 `resetPermission()`
-3. 验证重置流程
+1. Create PermissionManager instance
+2. Call `resetPermission()`
+3. Verify reset flow
 
-**预期结果**:
+**Expected Results**:
 
-- ConfigReader.setBypassPermission(false) 被调用
-- cache.refresh() 被调用
-- 返回 `true`
-- 触发权限变化事件（自动显示设置界面）
+- ConfigReader.setBypassPermission(false) is called
+- cache.refresh() is called
+- Returns `true`
+- Triggers permission change event (automatically shows setup interface)
 
-## 测试注意事项
+## Test Considerations
 
-### Mock 策略
+### Mock Strategy
 
-- Mock ConfigReader 和 PermissionCache
-- Mock PermissionWebview.createOrShow 静态方法
-- Mock ClaudeCodeProvider.createPermissionTerminal 静态方法
-- Mock vscode.window 的各种消息方法
+- Mock ConfigReader and PermissionCache
+- Mock PermissionWebview.createOrShow static method
+- Mock ClaudeCodeProvider.createPermissionTerminal static method
+- Mock vscode.window various message methods
 - Mock vscode.commands.executeCommand
 
-### 事件处理
+### Event Handling
 
-- PermissionManager 监听 cache 的事件
-- 测试需要模拟事件触发
-- 验证事件处理的副作用
+- PermissionManager listens to cache events
+- Tests need to simulate event triggers
+- Verify side effects of event handling
 
-### UI 管理
+### UI Management
 
-- WebView 和终端的创建和销毁
-- 确保 UI 元素正确关闭
-- 处理 WebView 的回调（onAccept, onCancel, onDispose）
+- Creation and destruction of WebView and terminal
+- Ensure UI elements are properly closed
+- Handle WebView callbacks (onAccept, onCancel, onDispose)
 
-### 异步流程
+### Async Flow
 
-- showPermissionSetup 返回 Promise
-- 需要正确处理 Promise 链
-- 重试循环是异步的
+- showPermissionSetup returns Promise
+- Need to properly handle Promise chains
+- Retry loop is asynchronous
 
-### 错误处理
+### Error Handling
 
-- 权限授予失败的处理
-- 卸载命令失败的处理
-- WebView 创建失败的处理
+- Handle permission grant failures
+- Handle uninstall command failures
+- Handle WebView creation failures
 
-### 资源清理
+### Resource Cleanup
 
-- dispose 方法清理所有资源
-- 包括事件监听器、WebView、终端
-- 调用子组件的 dispose 方法
+- dispose method cleans up all resources
+- Including event listeners, WebView, terminal
+- Call dispose methods of child components

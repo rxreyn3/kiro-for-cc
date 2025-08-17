@@ -1,301 +1,301 @@
-# PermissionCache 单元测试用例
+# PermissionCache Unit Test Cases
 
-## 测试文件
+## Test File
 
 `permissionCache.test.ts`
 
-## 测试目的
+## Test Purpose
 
-确保 PermissionCache 服务正确管理权限状态缓存，包括缓存读取、刷新、事件触发等核心功能。该模块是权限验证系统的核心组件，负责缓存权限状态并在权限变化时通知其他组件。
+Ensure the PermissionCache service correctly manages permission state caching, including cache reading, refreshing, event triggering, and other core functionalities. This module is a core component of the permission validation system, responsible for caching permission state and notifying other components when permissions change.
 
-## 测试用例概览
+## Test Case Overview
 
-| 用例 ID | 功能描述                          | 测试类型 |
-| ------- | --------------------------------- | -------- |
-| PC-01   | 首次获取权限状态（无缓存）        | 正向测试 |
-| PC-02   | 从缓存获取权限状态                | 正向测试 |
-| PC-03   | 刷新缓存（不返回值）              | 正向测试 |
-| PC-04   | 刷新并获取最新状态                | 正向测试 |
-| PC-05   | 权限从 false 变为 true 触发事件   | 正向测试 |
-| PC-06   | 权限从 true 变为 false 触发事件   | 正向测试 |
-| PC-07   | 权限状态不变时不触发事件          | 正向测试 |
-| PC-08   | 多次连续调用 get 使用缓存         | 性能测试 |
-| PC-09   | ConfigReader 读取失败时返回 false | 异常测试 |
-| PC-10   | 事件监听器正确接收权限变化        | 正向测试 |
+| Case ID | Feature Description                               | Test Type     |
+| ------- | ------------------------------------------------- | ------------- |
+| PC-01   | First time get permission status (no cache)      | Positive test |
+| PC-02   | Get permission status from cache                 | Positive test |
+| PC-03   | Refresh cache (no return value)                  | Positive test |
+| PC-04   | Refresh and get latest status                    | Positive test |
+| PC-05   | Permission change from false to true triggers event | Positive test |
+| PC-06   | Permission change from true to false triggers event | Positive test |
+| PC-07   | No event triggered when permission state unchanged | Positive test |
+| PC-08   | Multiple consecutive get calls use cache         | Performance test |
+| PC-09   | Return false when ConfigReader read fails       | Exception test |
+| PC-10   | Event listeners correctly receive permission changes | Positive test |
 
-## 详细测试步骤
+## Detailed Test Steps
 
-### PC-01: 首次获取权限状态（无缓存）
+### PC-01: First Time Get Permission Status (No Cache)
 
-**测试目的**: 验证首次调用 `get()` 时会从 ConfigReader 读取状态并缓存
+**Test Purpose**: Verify first call to `get()` reads from ConfigReader and caches state
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 返回 true
-- 确保缓存为空（首次调用）
+- Mock ConfigReader to return true
+- Ensure cache is empty (first call)
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 调用 `get()` 方法
-3. 验证 ConfigReader.getBypassPermissionStatus 被调用
-4. 验证返回值正确
+1. Create PermissionCache instance
+2. Call `get()` method
+3. Verify ConfigReader.getBypassPermissionStatus is called
+4. Verify return value is correct
 
-**预期结果**:
+**Expected Results**:
 
-- ConfigReader.getBypassPermissionStatus 被调用一次
-- 返回值为 true
-- 缓存被设置
+- ConfigReader.getBypassPermissionStatus is called once
+- Return value is true
+- Cache is set
 
-### PC-02: 从缓存获取权限状态
+### PC-02: Get Permission Status from Cache
 
-**测试目的**: 验证后续调用 `get()` 时直接从缓存返回，不再调用 ConfigReader
+**Test Purpose**: Verify subsequent calls to `get()` return directly from cache without calling ConfigReader
 
-**准备数据**:
+**Test Data**:
 
-- 先调用一次 `get()` 建立缓存
-- Mock ConfigReader 返回 true
+- First call `get()` to establish cache
+- Mock ConfigReader to return true
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 第一次调用 `get()` 建立缓存
-3. 第二次调用 `get()`
-4. 验证 ConfigReader 调用次数
+1. Create PermissionCache instance
+2. First call to `get()` to establish cache
+3. Second call to `get()`
+4. Verify ConfigReader call count
 
-**预期结果**:
+**Expected Results**:
 
-- ConfigReader.getBypassPermissionStatus 只被调用一次
-- 第二次调用直接返回缓存值
-- 两次返回值相同
+- ConfigReader.getBypassPermissionStatus is only called once
+- Second call returns cached value directly
+- Both return values are the same
 
-### PC-03: 刷新缓存（不返回值）
+### PC-03: Refresh Cache (No Return Value)
 
-**测试目的**: 验证 `refresh()` 方法更新缓存但不返回值
+**Test Purpose**: Verify `refresh()` method updates cache but does not return value
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 初始返回 false
-- 刷新后返回 true
+- Mock ConfigReader initially returns false
+- After refresh returns true
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 调用 `get()` 缓存 false
-3. 修改 Mock 返回值为 true
-4. 调用 `refresh()`
-5. 再次调用 `get()` 验证新值
+1. Create PermissionCache instance
+2. Call `get()` to cache false
+3. Change Mock return value to true
+4. Call `refresh()`
+5. Call `get()` again to verify new value
 
-**预期结果**:
+**Expected Results**:
 
-- `refresh()` 返回 Promise<void>
-- 缓存被更新为新值
-- 后续 `get()` 返回新值
+- `refresh()` returns Promise<void>
+- Cache is updated to new value
+- Subsequent `get()` returns new value
 
-### PC-04: 刷新并获取最新状态
+### PC-04: Refresh and Get Latest Status
 
-**测试目的**: 验证 `refreshAndGet()` 方法更新缓存并返回最新值
+**Test Purpose**: Verify `refreshAndGet()` method updates cache and returns latest value
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 返回 true
-- 初始缓存为 false
+- Mock ConfigReader to return true
+- Initial cache is false
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 设置初始缓存为 false
-3. 调用 `refreshAndGet()`
-4. 验证返回值和缓存状态
+1. Create PermissionCache instance
+2. Set initial cache to false
+3. Call `refreshAndGet()`
+4. Verify return value and cache state
 
-**预期结果**:
+**Expected Results**:
 
-- 返回最新值 true
-- 缓存被更新为 true
-- ConfigReader 被调用一次
+- Return latest value true
+- Cache is updated to true
+- ConfigReader is called once
 
-### PC-05: 权限从 false 变为 true 触发事件
+### PC-05: Permission Change from False to True Triggers Event
 
-**测试目的**: 验证权限授予时触发事件并记录日志
+**Test Purpose**: Verify event is triggered and logs recorded when permission is granted
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 初始返回 false
-- 刷新后返回 true
-- 设置事件监听器
+- Mock ConfigReader initially returns false
+- After refresh returns true
+- Set up event listeners
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 注册事件监听器
-3. 调用 `get()` 缓存 false
-4. 修改 Mock 返回 true
-5. 调用 `refreshAndGet()`
-6. 验证事件触发
+1. Create PermissionCache instance
+2. Register event listeners
+3. Call `get()` to cache false
+4. Change Mock to return true
+5. Call `refreshAndGet()`
+6. Verify event is triggered
 
-**预期结果**:
+**Expected Results**:
 
-- 事件监听器被调用，参数为 true
-- 日志包含: `[PermissionCache] Permission changed: false -> true`
-- 日志包含: `[PermissionCache] Permission granted! Firing event.`
+- Event listener is called with parameter true
+- Log contains: `[PermissionCache] Permission changed: false -> true`
+- Log contains: `[PermissionCache] Permission granted! Firing event.`
 
-### PC-06: 权限从 true 变为 false 触发事件
+### PC-06: Permission Change from True to False Triggers Event
 
-**测试目的**: 验证权限撤销时触发事件并记录日志
+**Test Purpose**: Verify event is triggered and logs recorded when permission is revoked
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 初始返回 true
-- 刷新后返回 false
-- 设置事件监听器
+- Mock ConfigReader initially returns true
+- After refresh returns false
+- Set up event listeners
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 注册事件监听器
-3. 调用 `get()` 缓存 true
-4. 修改 Mock 返回 false
-5. 调用 `refreshAndGet()`
-6. 验证事件触发
+1. Create PermissionCache instance
+2. Register event listeners
+3. Call `get()` to cache true
+4. Change Mock to return false
+5. Call `refreshAndGet()`
+6. Verify event is triggered
 
-**预期结果**:
+**Expected Results**:
 
-- 事件监听器被调用，参数为 false
-- 日志包含: `[PermissionCache] Permission changed: true -> false`
-- 日志包含: `[PermissionCache] Permission revoked! Firing event.`
+- Event listener is called with parameter false
+- Log contains: `[PermissionCache] Permission changed: true -> false`
+- Log contains: `[PermissionCache] Permission revoked! Firing event.`
 
-### PC-07: 权限状态不变时不触发事件
+### PC-07: No Event Triggered When Permission State Unchanged
 
-**测试目的**: 验证权限状态未改变时不触发事件，避免不必要的通知
+**Test Purpose**: Verify no event is triggered when permission state is unchanged, avoiding unnecessary notifications
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 始终返回 true
-- 设置事件监听器
+- Mock ConfigReader always returns true
+- Set up event listeners
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 注册事件监听器
-3. 调用 `get()` 缓存 true
-4. 调用 `refreshAndGet()`
-5. 验证事件未触发
+1. Create PermissionCache instance
+2. Register event listeners
+3. Call `get()` to cache true
+4. Call `refreshAndGet()`
+5. Verify event is not triggered
 
-**预期结果**:
+**Expected Results**:
 
-- 事件监听器不被调用
-- 不输出权限变化日志
-- 缓存值保持不变
+- Event listener is not called
+- No permission change logs output
+- Cache value remains unchanged
 
-### PC-08: 多次连续调用 get 使用缓存
+### PC-08: Multiple Consecutive Get Calls Use Cache
 
-**测试目的**: 验证缓存机制的性能优势，避免频繁文件读取
+**Test Purpose**: Verify cache mechanism performance advantage, avoiding frequent file reads
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 返回 true
-- 模拟多次连续调用
+- Mock ConfigReader to return true
+- Simulate multiple consecutive calls
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 连续调用 `get()` 10 次
-3. 验证 ConfigReader 调用次数
-4. 验证所有返回值一致
+1. Create PermissionCache instance
+2. Call `get()` 10 times consecutively
+3. Verify ConfigReader call count
+4. Verify all return values are consistent
 
-**预期结果**:
+**Expected Results**:
 
-- ConfigReader.getBypassPermissionStatus 只被调用一次
-- 所有调用返回相同值
-- 后续调用立即返回（无异步等待）
+- ConfigReader.getBypassPermissionStatus is only called once
+- All calls return the same value
+- Subsequent calls return immediately (no async waiting)
 
-### PC-09: ConfigReader 读取失败时返回 false
+### PC-09: Return False When ConfigReader Read Fails
 
-**测试目的**: 验证错误处理机制，确保系统在读取失败时安全降级
+**Test Purpose**: Verify error handling mechanism, ensure system safely degrades when read fails
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 抛出错误
-- 错误信息：`File read error`
+- Mock ConfigReader to throw error
+- Error message: `File read error`
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 配置 ConfigReader Mock 抛出错误
-3. 调用 `get()`
-4. 验证返回值和错误处理
+1. Create PermissionCache instance
+2. Configure ConfigReader Mock to throw error
+3. Call `get()`
+4. Verify return value and error handling
 
-**预期结果**:
+**Expected Results**:
 
-- 返回 false（安全默认值）
-- 不抛出未捕获的异常
-- 缓存值为 false
+- Return false (safe default value)
+- Do not throw uncaught exceptions
+- Cache value is false
 
-### PC-10: 事件监听器正确接收权限变化
+### PC-10: Event Listeners Correctly Receive Permission Changes
 
-**测试目的**: 验证 EventEmitter 机制正确工作，支持多个监听器
+**Test Purpose**: Verify EventEmitter mechanism works correctly, supporting multiple listeners
 
-**准备数据**:
+**Test Data**:
 
-- Mock ConfigReader 返回值变化序列
-- 注册多个事件监听器
+- Mock ConfigReader return value change sequence
+- Register multiple event listeners
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 PermissionCache 实例
-2. 注册 3 个不同的事件监听器
-3. 触发权限变化（false -> true）
-4. 验证所有监听器被调用
-5. 移除一个监听器
-6. 再次触发权限变化
-7. 验证剩余监听器被调用
+1. Create PermissionCache instance
+2. Register 3 different event listeners
+3. Trigger permission change (false -> true)
+4. Verify all listeners are called
+5. Remove one listener
+6. Trigger permission change again
+7. Verify remaining listeners are called
 
-**预期结果**:
+**Expected Results**:
 
-- 所有注册的监听器都接收到事件
-- 监听器接收正确的参数值
-- 移除的监听器不再被调用
-- 剩余监听器继续正常工作
+- All registered listeners receive events
+- Listeners receive correct parameter values
+- Removed listener is no longer called
+- Remaining listeners continue to work normally
 
-## 测试注意事项
+## Test Considerations
 
-### Mock 策略
+### Mocking Strategy
 
-- Mock ConfigReader 的 `getBypassPermissionStatus` 方法
-- Mock OutputChannel 的 `appendLine` 方法
-- 使用 Jest 的 `jest.fn()` 跟踪调用
+- Mock ConfigReader's `getBypassPermissionStatus` method
+- Mock OutputChannel's `appendLine` method
+- Use Jest's `jest.fn()` to track calls
 
-### 事件系统测试
+### Event System Testing
 
-- PermissionCache 继承自 vscode.EventEmitter<boolean>
-- 使用 `event` 属性注册监听器
-- 事件只在权限状态变化时触发
-- 支持多个监听器同时工作
+- PermissionCache inherits from vscode.EventEmitter<boolean>
+- Use `event` property to register listeners
+- Events only trigger when permission state changes
+- Support multiple listeners working simultaneously
 
-### 缓存机制
+### Cache Mechanism
 
-- 缓存使用 private 字段 `cache?: boolean`
-- undefined 表示未缓存，需要读取
-- 缓存后的值可能是 false（有效缓存）
-- 刷新操作会更新缓存
+- Cache uses private field `cache?: boolean`
+- undefined indicates uncached, needs reading
+- Cached value may be false (valid cache)
+- Refresh operations update cache
 
-### 日志输出
+### Log Output
 
-- 权限变化时输出详细日志
-- 包含旧值和新值的对比
-- 区分授权和撤销两种情况
-- 状态不变时不输出日志
+- Output detailed logs when permissions change
+- Include comparison of old and new values
+- Distinguish between grant and revoke scenarios
+- No logs output when state unchanged
 
-### 异步操作
+### Async Operations
 
-- 所有方法返回 Promise
-- ConfigReader 操作是异步的
-- 事件触发是同步的
-- 测试需要正确处理 Promise
+- All methods return Promise
+- ConfigReader operations are asynchronous
+- Event triggering is synchronous
+- Tests need to properly handle Promises
 
-### 边界条件
+### Edge Conditions
 
-- 首次调用时缓存为 undefined
-- false 是有效的缓存值
-- 连续相同的刷新不触发事件
-- ConfigReader 异常时返回 false
+- First call has cache as undefined
+- false is a valid cache value
+- Consecutive identical refreshes don't trigger events
+- Return false when ConfigReader throws exceptions

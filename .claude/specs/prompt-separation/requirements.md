@@ -2,53 +2,53 @@
 
 ## Introduction
 
-当前系统架构中，AI prompt 模板与业务逻辑代码紧密耦合，导致以下技术债务：
+In the current system architecture, AI prompt templates are tightly coupled with business logic code, leading to the following technical debt:
 
-- **代码耦合度高**：Prompt 模板嵌入在业务逻辑中，违反了单一职责原则（SRP）
-- **版本控制粒度不当**：Prompt 迭代与代码版本强绑定，无法独立进行版本管理和回滚
-- **配置管理缺失**：缺乏环境隔离机制，无法实现 prompt 的 A/B 测试和灰度发布
-- **复用性差**：相同的 prompt 模板在多处硬编码，违反了 DRY（Don't Repeat Yourself）原则
-- **可维护性低**：Prompt 优化需要修改源代码并重新部署，增加了系统风险
+- **High Code Coupling**: Prompt templates embedded in business logic, violating the Single Responsibility Principle (SRP)
+- **Inappropriate Version Control Granularity**: Prompt iterations are strongly bound to code versions, unable to independently manage versions and rollbacks
+- **Missing Configuration Management**: Lack of environment isolation mechanisms, unable to implement A/B testing and gradual deployment of prompts
+- **Poor Reusability**: Same prompt templates hard-coded in multiple places, violating the DRY (Don't Repeat Yourself) principle
+- **Low Maintainability**: Prompt optimization requires modifying source code and redeployment, increasing system risks
 
-本规范定义了一套 Prompt 管理系统的架构要求，通过实现 prompt 与代码的解耦，建立标准化的 prompt 资产管理流程。
+This specification defines architectural requirements for a Prompt Management System, establishing standardized prompt asset management processes through decoupling prompts from code.
 
 ## Requirements
 
-### Requirement 1: Prompt 存储格式与目录结构规范
+### Requirement 1: Prompt Storage Format and Directory Structure Standards
 
-**User Story:** 作为系统开发者，我需要标准化的 prompt 存储格式和目录结构，确保可扩展性和可维护性
-
-#### Acceptance Criteria
-
-1. WHEN 持久化 prompt THEN 系统 SHALL 采用结构化数据格式（YAML/JSON/TOML）
-2. WHEN 组织 prompt 文件 THEN 系统 SHALL 遵循领域驱动设计（DDD）的目录层次结构
-3. IF prompt 包含元数据 THEN 系统 SHALL 使用标准化 schema 进行验证和存储
-4. WHEN 创建 prompt 实体 THEN 系统 SHALL 生成 UUID 作为不可变标识符
-5. IF 存在 prompt 继承链 THEN 系统 SHALL 支持基于原型链的组合模式
-
-### Requirement 2: Prompt 提取与持久化存储
-
-**User Story:** 作为系统开发者，我需要将内嵌的 prompt 模板提取至独立的配置文件，实现关注点分离
+**User Story:** As a system developer, I need standardized prompt storage format and directory structure to ensure scalability and maintainability
 
 #### Acceptance Criteria
 
-1. WHEN 执行 prompt 提取操作 THEN 系统 SHALL 通过静态代码分析识别所有 prompt 定义点
-2. WHEN 检测到 prompt 模板 THEN 系统 SHALL 将其持久化至配置存储层
-3. IF prompt 包含模板变量或插值表达式 THEN 系统 SHALL 保持其参数化特性
-4. WHEN prompt 提取完成 THEN 系统 SHALL 生成对应的引用标识符并替换原始代码
-5. IF 提取过程异常 THEN 系统 SHALL 执行事务回滚并输出详细的错误堆栈
-6. WHEN 需要批量提取 THEN 系统 SHALL 支持对整个目录或项目的递归扫描
-7. IF 检测到重复的 prompt 内容 THEN 系统 SHALL 提示用户合并为同一个 prompt 文件
+1. WHEN persisting prompts THEN the system SHALL adopt structured data formats (YAML/JSON/TOML)
+2. WHEN organizing prompt files THEN the system SHALL follow Domain-Driven Design (DDD) directory hierarchy
+3. IF prompts contain metadata THEN the system SHALL use standardized schema for validation and storage
+4. WHEN creating prompt entities THEN the system SHALL generate UUIDs as immutable identifiers
+5. IF prompt inheritance chains exist THEN the system SHALL support prototype chain-based composition patterns
 
-### Requirement 3: Prompt 运行时加载机制
+### Requirement 2: Prompt Extraction and Persistent Storage
 
-**User Story:** 作为系统开发者，我需要高性能的 prompt 加载器，支持动态加载和参数注入
+**User Story:** As a system developer, I need to extract embedded prompt templates to independent configuration files, achieving separation of concerns
 
 #### Acceptance Criteria
 
-1. WHEN 应用层请求 prompt THEN 系统 SHALL 通过依赖注入提供 prompt 加载服务
-2. WHEN 执行 prompt 渲染 THEN 系统 SHALL 支持模板引擎的参数绑定和表达式求值
-3. IF prompt 资源异常 THEN 系统 SHALL 抛出自定义异常并包含上下文信息
-4. WHEN 处于开发模式 THEN 系统 SHALL 启用文件监听器实现热重载
-5. IF 存在多环境配置 THEN 系统 SHALL 基于策略模式实现环境感知的 prompt 解析
+1. WHEN executing prompt extraction operations THEN the system SHALL identify all prompt definition points through static code analysis
+2. WHEN detecting prompt templates THEN the system SHALL persist them to the configuration storage layer
+3. IF prompts contain template variables or interpolation expressions THEN the system SHALL maintain their parameterized characteristics
+4. WHEN prompt extraction is complete THEN the system SHALL generate corresponding reference identifiers and replace original code
+5. IF extraction process encounters exceptions THEN the system SHALL execute transaction rollback and output detailed error stacks
+6. WHEN batch extraction is needed THEN the system SHALL support recursive scanning of entire directories or projects
+7. IF duplicate prompt content is detected THEN the system SHALL prompt users to merge into the same prompt file
+
+### Requirement 3: Prompt Runtime Loading Mechanism
+
+**User Story:** As a system developer, I need a high-performance prompt loader that supports dynamic loading and parameter injection
+
+#### Acceptance Criteria
+
+1. WHEN application layer requests prompts THEN the system SHALL provide prompt loading services through dependency injection
+2. WHEN executing prompt rendering THEN the system SHALL support template engine parameter binding and expression evaluation
+3. IF prompt resources encounter exceptions THEN the system SHALL throw custom exceptions with context information
+4. WHEN in development mode THEN the system SHALL enable file watchers for hot reloading
+5. IF multi-environment configurations exist THEN the system SHALL implement environment-aware prompt resolution based on strategy patterns
 

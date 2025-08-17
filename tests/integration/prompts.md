@@ -1,47 +1,47 @@
-# Prompts 集成测试用例
+# Prompts Integration Test Cases
 
-## 测试文件
+## Test File
 
 `prompts.test.ts`
 
-## 测试目的
+## Test Purpose
 
-确保 Prompt 系统的端到端功能在代码更新后仍然正常工作，包括真实 prompt 文件的加载、渲染、内容验证等完整流程。
+Ensure that the Prompt system's end-to-end functionality continues to work properly after code updates, including the complete process of loading real prompt files, rendering, content validation, etc.
 
-## 测试用例概览
+## Test Case Overview
 
-| 用例 ID | 功能描述                               | 测试类型 |
-| ------- | -------------------------------------- | -------- |
-| INT-01  | 生成正确的 spec 创建 prompt            | 正向测试 |
-| INT-02  | 验证 spec prompt 包含目录创建指令      | 正向测试 |
-| INT-03  | 生成 steering 初始化 prompt            | 正向测试 |
-| INT-04  | 验证 steering prompt 包含分析指令      | 正向测试 |
-| INT-05  | 验证 steering prompt 包含文件指令      | 正向测试 |
-| INT-06  | 生成自定义 steering 创建 prompt        | 正向测试 |
-| INT-07  | 验证自定义 steering 文件命名指令       | 正向测试 |
-| INT-08  | 生成 steering 精炼 prompt              | 正向测试 |
-| INT-09  | 验证精炼 prompt 改进指南               | 正向测试 |
-| INT-10  | 生成 steering 删除 prompt              | 正向测试 |
-| INT-11  | 验证所有 prompts 的 frontmatter        | 正向测试 |
-| INT-12  | 验证所有 prompts 可成功渲染            | 正向测试 |
-| INT-13  | 验证渲染内容不含模板错误               | 正向测试 |
-| INT-14  | 验证 prompts 的结构一致性              | 正向测试 |
-| INT-15  | create spec prompt 快照测试            | 回归测试 |
-| INT-16  | init steering prompt 快照测试          | 回归测试 |
-| INT-17  | create custom steering prompt 快照测试 | 回归测试 |
-| INT-18  | refine steering prompt 快照测试        | 回归测试 |
-| INT-19  | delete steering prompt 快照测试        | 回归测试 |
+| Case ID | Function Description                   | Test Type |
+| ------- | -------------------------------------- | --------- |
+| INT-01  | Generate correct spec creation prompt  | Positive Test |
+| INT-02  | Verify spec prompt contains directory creation instructions | Positive Test |
+| INT-03  | Generate steering initialization prompt | Positive Test |
+| INT-04  | Verify steering prompt contains analysis instructions | Positive Test |
+| INT-05  | Verify steering prompt contains file instructions | Positive Test |
+| INT-06  | Generate custom steering creation prompt | Positive Test |
+| INT-07  | Verify custom steering file naming instructions | Positive Test |
+| INT-08  | Generate steering refinement prompt    | Positive Test |
+| INT-09  | Verify refinement prompt improvement guidelines | Positive Test |
+| INT-10  | Generate steering deletion prompt      | Positive Test |
+| INT-11  | Verify frontmatter of all prompts     | Positive Test |
+| INT-12  | Verify all prompts can be successfully rendered | Positive Test |
+| INT-13  | Verify rendered content contains no template errors | Positive Test |
+| INT-14  | Verify structural consistency of prompts | Positive Test |
+| INT-15  | create spec prompt snapshot test       | Regression Test |
+| INT-16  | init steering prompt snapshot test     | Regression Test |
+| INT-17  | create custom steering prompt snapshot test | Regression Test |
+| INT-18  | refine steering prompt snapshot test   | Regression Test |
+| INT-19  | delete steering prompt snapshot test   | Regression Test |
 
-## 详细测试步骤
+## Detailed Test Steps
 
-### INT-01: 生成正确的 spec 创建 prompt
+### INT-01: Generate correct spec creation prompt
 
-**测试目的**: 验证 create-spec prompt 能够正确渲染并包含所有必需元素
+**Test Purpose**: Verify that the create-spec prompt can be correctly rendered and contains all required elements
 
-**准备数据**:
+**Test Data**:
 
-- 初始化 PromptLoader 并加载真实 prompts
-- 变量数据：
+- Initialize PromptLoader and load real prompts
+- Variable data:
 
   ```typescript
   {
@@ -51,48 +51,48 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 调用 `promptLoader.renderPrompt('create-spec', variables)`
-2. 检查返回的字符串内容
-3. 验证包含所有提供的变量值
-4. 验证包含系统指令和工作流说明
+1. Call `promptLoader.renderPrompt('create-spec', variables)`
+2. Check the returned string content
+3. Verify it contains all provided variable values
+4. Verify it contains system instructions and workflow descriptions
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'A user authentication system with OAuth support'
-- 包含 '/Users/test/my-project'
-- 包含 '.claude/specs'
-- 包含 '<system>' 标签
-- 包含 'spec workflow' 说明
-- 包含 'Requirements'、'Design'、'Tasks' 阶段
+- Contains 'A user authentication system with OAuth support'
+- Contains '/Users/test/my-project'
+- Contains '.claude/specs'
+- Contains '<system>' tags
+- Contains 'spec workflow' descriptions
+- Contains 'Requirements', 'Design', 'Tasks' phases
 
-### INT-02: 验证 spec prompt 包含目录创建指令
+### INT-02: Verify spec prompt contains directory creation instructions
 
-**测试目的**: 验证 spec 创建 prompt 包含正确的目录创建指令
+**Test Purpose**: Verify that the spec creation prompt contains correct directory creation instructions
 
-**准备数据**:
+**Test Data**:
 
-- 使用与 INT-01 相同的变量
+- Use the same variables as INT-01
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 create-spec prompt
-2. 搜索目录创建相关的关键词
-3. 验证路径引用
+1. Render create-spec prompt
+2. Search for directory creation related keywords
+3. Verify path references
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'mkdir' 或 'create.*directory' 模式
-- 包含 '.claude/specs' 路径引用
+- Contains 'mkdir' or 'create.*directory' patterns
+- Contains '.claude/specs' path references
 
-### INT-03: 生成 steering 初始化 prompt
+### INT-03: Generate steering initialization prompt
 
-**测试目的**: 验证 init-steering prompt 能够正确生成初始化指令
+**Test Purpose**: Verify that the init-steering prompt can correctly generate initialization instructions
 
-**准备数据**:
+**Test Data**:
 
-- 变量数据：
+- Variable data:
 
   ```typescript
   {
@@ -100,65 +100,65 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 调用 `promptLoader.renderPrompt('init-steering', variables)`
-2. 验证返回内容的关键元素
-3. 检查路径正确替换
+1. Call `promptLoader.renderPrompt('init-steering', variables)`
+2. Verify key elements in returned content
+3. Check correct path replacement
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'steering documents'
-- 包含 '/Users/test/project/.claude/steering'
-- 包含 'codebase' 关键词
+- Contains 'steering documents'
+- Contains '/Users/test/project/.claude/steering'
+- Contains 'codebase' keyword
 
-### INT-04: 验证 steering prompt 包含分析指令
+### INT-04: Verify steering prompt contains analysis instructions
 
-**测试目的**: 验证初始化 prompt 包含代码库分析的相关指令
+**Test Purpose**: Verify that the initialization prompt contains instructions related to codebase analysis
 
-**准备数据**:
+**Test Data**:
 
-- 使用与 INT-03 相同的变量
+- Use the same variables as INT-03
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 init-steering prompt
-2. 搜索分析相关的关键词
-3. 验证包含模式和约定说明
+1. Render init-steering prompt
+2. Search for analysis-related keywords
+3. Verify it contains patterns and conventions descriptions
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'analyzing' 关键词
-- 包含 'patterns'
-- 包含 'conventions'
+- Contains 'analyzing' keyword
+- Contains 'patterns'
+- Contains 'conventions'
 
-### INT-05: 验证 steering prompt 包含文件指令
+### INT-05: Verify steering prompt contains file instructions
 
-**测试目的**: 验证初始化 prompt 包含创建必需文件的指令
+**Test Purpose**: Verify that the initialization prompt contains instructions for creating required files
 
-**准备数据**:
+**Test Data**:
 
-- 使用与 INT-03 相同的变量
+- Use the same variables as INT-03
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 init-steering prompt
-2. 检查文件创建相关内容
-3. 验证三个核心文件的说明
+1. Render init-steering prompt
+2. Check file creation related content
+3. Verify descriptions of three core files
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'file' 关键词
-- 包含 '.md' 扩展名
-- 包含 'product.md'、'tech.md'、'structure.md' 文件名
+- Contains 'file' keyword
+- Contains '.md' extension
+- Contains 'product.md', 'tech.md', 'structure.md' filenames
 
-### INT-06: 生成自定义 steering 创建 prompt
+### INT-06: Generate custom steering creation prompt
 
-**测试目的**: 验证 create-custom-steering prompt 的正确渲染
+**Test Purpose**: Verify correct rendering of the create-custom-steering prompt
 
-**准备数据**:
+**Test Data**:
 
-- 变量数据：
+- Variable data:
 
   ```typescript
   {
@@ -167,44 +167,44 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 调用 `promptLoader.renderPrompt('create-custom-steering', variables)`
-2. 验证描述正确插入
-3. 验证路径正确替换
+1. Call `promptLoader.renderPrompt('create-custom-steering', variables)`
+2. Verify description is correctly inserted
+3. Verify path is correctly replaced
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'Security best practices for API development'
-- 包含 'steering document'
-- 包含 '/test/project/.claude/steering'
+- Contains 'Security best practices for API development'
+- Contains 'steering document'
+- Contains '/test/project/.claude/steering'
 
-### INT-07: 验证自定义 steering 文件命名指令
+### INT-07: Verify custom steering file naming instructions
 
-**测试目的**: 验证 prompt 包含正确的文件命名指导
+**Test Purpose**: Verify that the prompt contains correct file naming guidance
 
-**准备数据**:
+**Test Data**:
 
-- 使用与 INT-06 相同的变量
+- Use the same variables as INT-06
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 create-custom-steering prompt
-2. 搜索文件命名相关指令
-3. 验证命名格式说明
+1. Render create-custom-steering prompt
+2. Search for file naming related instructions
+3. Verify naming format descriptions
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'Choose an appropriate kebab-case filename'
-- 包含 '.md' 扩展名说明
+- Contains 'Choose an appropriate kebab-case filename'
+- Contains '.md' extension description
 
-### INT-08: 生成 steering 精炼 prompt
+### INT-08: Generate steering refinement prompt
 
-**测试目的**: 验证 refine-steering prompt 的功能
+**Test Purpose**: Verify the functionality of the refine-steering prompt
 
-**准备数据**:
+**Test Data**:
 
-- 变量数据：
+- Variable data:
 
   ```typescript
   {
@@ -212,45 +212,45 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 调用 `promptLoader.renderPrompt('refine-steering', variables)`
-2. 验证文件路径正确插入
-3. 验证包含精炼指令
+1. Call `promptLoader.renderPrompt('refine-steering', variables)`
+2. Verify file path is correctly inserted
+3. Verify it contains refinement instructions
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 '/test/project/.claude/steering/security.md'
-- 包含 'refine' 关键词
-- 包含 'Review and refine'
+- Contains '/test/project/.claude/steering/security.md'
+- Contains 'refine' keyword
+- Contains 'Review and refine'
 
-### INT-09: 验证精炼 prompt 改进指南
+### INT-09: Verify refinement prompt improvement guidelines
 
-**测试目的**: 验证精炼 prompt 包含具体的改进指导原则
+**Test Purpose**: Verify that the refinement prompt contains specific improvement guidance principles
 
-**准备数据**:
+**Test Data**:
 
-- 使用与 INT-08 相同的变量
+- Use the same variables as INT-08
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 refine-steering prompt
-2. 检查改进指南内容
-3. 验证具体的指导原则
+1. Render refine-steering prompt
+2. Check improvement guidelines content
+3. Verify specific guidance principles
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'clear and direct'
-- 包含 'specific to this project'
-- 包含 'concrete examples'
+- Contains 'clear and direct'
+- Contains 'specific to this project'
+- Contains 'concrete examples'
 
-### INT-10: 生成 steering 删除 prompt
+### INT-10: Generate steering deletion prompt
 
-**测试目的**: 验证 delete-steering prompt 的正确生成
+**Test Purpose**: Verify correct generation of the delete-steering prompt
 
-**准备数据**:
+**Test Data**:
 
-- 变量数据：
+- Variable data:
 
   ```typescript
   {
@@ -259,112 +259,112 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 调用 `promptLoader.renderPrompt('delete-steering', variables)`
-2. 验证文档名称正确插入
-3. 验证路径和删除说明
+1. Call `promptLoader.renderPrompt('delete-steering', variables)`
+2. Verify document name is correctly inserted
+3. Verify path and deletion descriptions
 
-**预期结果**:
+**Expected Results**:
 
-- 包含 'security-practices.md'
-- 包含 'delete' 关键词
-- 包含 '/test/.claude/steering'
+- Contains 'security-practices.md'
+- Contains 'delete' keyword
+- Contains '/test/.claude/steering'
 
-### INT-11: 验证所有 prompts 的 frontmatter
+### INT-11: Verify frontmatter of all prompts
 
-**测试目的**: 验证所有加载的 prompts 都有有效的元数据
+**Test Purpose**: Verify that all loaded prompts have valid metadata
 
-**准备数据**:
+**Test Data**:
 
-- 初始化的 PromptLoader 实例
+- Initialized PromptLoader instance
 
-**测试步骤**:
+**Test Steps**:
 
-1. 调用 `promptLoader.listPrompts()`
-2. 遍历所有 prompt 元数据
-3. 验证每个 prompt 的必需字段
+1. Call `promptLoader.listPrompts()`
+2. Iterate through all prompt metadata
+3. Verify required fields for each prompt
 
-**预期结果**:
+**Expected Results**:
 
-- 每个 prompt 都有非空的 id
-- 每个 prompt 都有非空的 name
-- 每个 prompt 的 version 符合语义化版本格式（\d+\.\d+\.\d+）
+- Each prompt has a non-empty id
+- Each prompt has a non-empty name
+- Each prompt's version follows semantic version format (\d+\.\d+\.\d+)
 
-### INT-12: 验证所有 prompts 可成功渲染
+### INT-12: Verify all prompts can be successfully rendered
 
-**测试目的**: 验证所有 prompts 在提供必需变量时都能成功渲染
+**Test Purpose**: Verify that all prompts can be successfully rendered when provided with required variables
 
-**准备数据**:
+**Test Data**:
 
-- 每个 prompt 的测试变量集：
+- Test variable sets for each prompt:
 
   ```typescript
   [
     { id: 'create-spec', variables: { description: 'test', workspacePath: '/test', specBasePath: '.claude/specs' } },
     { id: 'init-steering', variables: { steeringPath: '/test/.claude/steering' } },
-    // ... 其他 prompts
+    // ... other prompts
   ]
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 遍历所有测试用例
-2. 为每个 prompt 调用 renderPrompt
-3. 验证不抛出异常
+1. Iterate through all test cases
+2. Call renderPrompt for each prompt
+3. Verify no exceptions are thrown
 
-**预期结果**:
+**Expected Results**:
 
-- 所有 prompts 都能成功渲染
-- 不抛出任何异常
+- All prompts can be successfully rendered
+- No exceptions are thrown
 
-### INT-13: 验证渲染内容不含模板错误
+### INT-13: Verify rendered content contains no template errors
 
-**测试目的**: 验证渲染后的内容不包含未解析的模板标记
+**Test Purpose**: Verify that rendered content does not contain unresolved template markers
 
-**准备数据**:
+**Test Data**:
 
-- 使用与 INT-12 相同的测试数据
+- Use the same test data as INT-12
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染每个 prompt
-2. 检查常见的模板错误标记
-3. 验证内容完整性
+1. Render each prompt
+2. Check for common template error markers
+3. Verify content integrity
 
-**预期结果**:
+**Expected Results**:
 
-- 不包含 '{{'
-- 不包含 '}}'
-- 不包含 'undefined'
-- 不包含 '[object Object]'
+- Does not contain '{{'
+- Does not contain '}}'
+- Does not contain 'undefined'
+- Does not contain '[object Object]'
 
-### INT-14: 验证 prompts 的结构一致性
+### INT-14: Verify structural consistency of prompts
 
-**测试目的**: 验证主要 prompts 保持一致的结构
+**Test Purpose**: Verify that main prompts maintain consistent structure
 
-**准备数据**:
+**Test Data**:
 
-- spec 和 steering prompts 的渲染结果
+- Rendered results of spec and steering prompts
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 create-spec prompt
-2. 渲染 init-steering prompt
-3. 比较两者的结构元素
+1. Render create-spec prompt
+2. Render init-steering prompt
+3. Compare structural elements of both
 
-**预期结果**:
+**Expected Results**:
 
-- 两者都包含 <system> 标签结构
-- 都遵循相似的文档格式
+- Both contain <system> tag structure
+- Both follow similar document format
 
-### INT-15: spec 创建 prompt 快照测试
+### INT-15: spec creation prompt snapshot test
 
-**测试目的**: 使用快照测试确保 spec 创建 prompt 输出的稳定性
+**Test Purpose**: Use snapshot testing to ensure stability of spec creation prompt output
 
-**准备数据**:
+**Test Data**:
 
-- 固定的测试变量：
+- Fixed test variables:
 
   ```typescript
   {
@@ -374,24 +374,24 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 create-spec prompt
-2. 生成或比较快照
-3. 验证输出未发生意外变化
+1. Render create-spec prompt
+2. Generate or compare snapshot
+3. Verify output has not changed unexpectedly
 
-**预期结果**:
+**Expected Results**:
 
-- 输出与保存的快照匹配
-- 任何变化都需要明确审查和更新
+- Output matches saved snapshot
+- Any changes require explicit review and update
 
-### INT-16: steering 初始化 prompt 快照测试
+### INT-16: steering initialization prompt snapshot test
 
-**测试目的**: 使用快照测试确保 steering 初始化 prompt 的稳定性
+**Test Purpose**: Use snapshot testing to ensure stability of steering initialization prompt
 
-**准备数据**:
+**Test Data**:
 
-- 固定的测试变量：
+- Fixed test variables:
 
   ```typescript
   {
@@ -399,24 +399,24 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 init-steering prompt
-2. 生成或比较快照
-3. 验证输出的一致性
+1. Render init-steering prompt
+2. Generate or compare snapshot
+3. Verify output consistency
 
-**预期结果**:
+**Expected Results**:
 
-- 输出与保存的快照匹配
-- 保持向后兼容性
+- Output matches saved snapshot
+- Maintains backward compatibility
 
-### INT-17: 创建自定义 steering prompt 快照测试
+### INT-17: create custom steering prompt snapshot test
 
-**测试目的**: 使用快照测试确保自定义 steering 创建 prompt 的稳定性
+**Test Purpose**: Use snapshot testing to ensure stability of custom steering creation prompt
 
-**准备数据**:
+**Test Data**:
 
-- 固定的测试变量：
+- Fixed test variables:
 
   ```typescript
   {
@@ -425,24 +425,24 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 create-custom-steering prompt
-2. 生成或比较快照
-3. 验证输出的一致性
+1. Render create-custom-steering prompt
+2. Generate or compare snapshot
+3. Verify output consistency
 
-**预期结果**:
+**Expected Results**:
 
-- 输出与保存的快照匹配
-- 包含用户提供的描述信息
+- Output matches saved snapshot
+- Contains user-provided description information
 
-### INT-18: 精炼 steering prompt 快照测试
+### INT-18: refine steering prompt snapshot test
 
-**测试目的**: 使用快照测试确保 steering 精炼 prompt 的稳定性
+**Test Purpose**: Use snapshot testing to ensure stability of steering refinement prompt
 
-**准备数据**:
+**Test Data**:
 
-- 固定的测试变量：
+- Fixed test variables:
 
   ```typescript
   {
@@ -450,24 +450,24 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 refine-steering prompt
-2. 生成或比较快照
-3. 验证精炼指导内容的稳定性
+1. Render refine-steering prompt
+2. Generate or compare snapshot
+3. Verify stability of refinement guidance content
 
-**预期结果**:
+**Expected Results**:
 
-- 输出与保存的快照匹配
-- 包含正确的文件路径引用
+- Output matches saved snapshot
+- Contains correct file path references
 
-### INT-19: 删除 steering prompt 快照测试
+### INT-19: delete steering prompt snapshot test
 
-**测试目的**: 使用快照测试确保 steering 删除 prompt 的稳定性
+**Test Purpose**: Use snapshot testing to ensure stability of steering deletion prompt
 
-**准备数据**:
+**Test Data**:
 
-- 固定的测试变量：
+- Fixed test variables:
 
   ```typescript
   {
@@ -476,39 +476,39 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 渲染 delete-steering prompt
-2. 生成或比较快照
-3. 验证删除操作的提示内容
+1. Render delete-steering prompt
+2. Generate or compare snapshot
+3. Verify deletion operation prompt content
 
-**预期结果**:
+**Expected Results**:
 
-- 输出与保存的快照匹配
-- 包含文档名称和路径信息
+- Output matches saved snapshot
+- Contains document name and path information
 
-## 测试注意事项
+## Test Considerations
 
-### 真实文件依赖
+### Real File Dependencies
 
-- 集成测试使用真实的 prompt 文件
-- 确保 prompts/target 目录已正确编译
-- 测试前运行 build-prompts 脚本
+- Integration tests use real prompt files
+- Ensure prompts/target directory is correctly compiled
+- Run build-prompts script before testing
 
-### 快照测试管理
+### Snapshot Test Management
 
-- 快照文件保存在 **snapshots** 目录
-- 更新快照需要明确的意图：`npm test -- -u`
-- 定期审查快照变化，避免意外回归
+- Snapshot files are saved in **snapshots** directory
+- Updating snapshots requires explicit intent: `npm test -- -u`
+- Regularly review snapshot changes to avoid unexpected regressions
 
-### 变量覆盖
+### Variable Coverage
 
-- 测试应覆盖必需和可选变量的各种组合
-- 边界情况：空字符串、特殊字符、长文本
-- 确保错误路径也被测试
+- Tests should cover various combinations of required and optional variables
+- Edge cases: empty strings, special characters, long text
+- Ensure error paths are also tested
 
-### 性能监控
+### Performance Monitoring
 
-- 集成测试比单元测试慢
-- 监控测试执行时间
-- 必要时优化或并行化测试
+- Integration tests are slower than unit tests
+- Monitor test execution time
+- Optimize or parallelize tests when necessary

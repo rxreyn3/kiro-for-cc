@@ -63,7 +63,7 @@ export class ClaudeCodeProvider {
      */
     async invokeClaudeSplitView(prompt: string, title: string = 'Kiro for Claude Code'): Promise<vscode.Terminal> {
         try {
-            // 获取 PermissionManager 并检查权限
+            // Get PermissionManager and check permissions
             const permissionManager = getPermissionManager();
             if (permissionManager) {
                 const hasPermission = await permissionManager.checkPermission();
@@ -144,7 +144,7 @@ export class ClaudeCodeProvider {
     async invokeClaudeHeadless(
         prompt: string
     ): Promise<{ exitCode: number | undefined; output?: string }> {
-        // 获取 PermissionManager 实例并检查权限
+        // Get PermissionManager instance and check permissions
         const permissionManager = getPermissionManager();
         if (permissionManager) {
             const hasPermission = await permissionManager.checkPermission();
@@ -243,7 +243,7 @@ export class ClaudeCodeProvider {
     }
 
     /**
-     * 创建权限设置终端（供 PermissionManager 使用）
+     * Create permission setup terminal (for PermissionManager use)
      */
     static createPermissionTerminal(): vscode.Terminal {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;

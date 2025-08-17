@@ -1,37 +1,37 @@
-# ConfigReader 单元测试用例
+# ConfigReader Unit Test Cases
 
-## 测试文件
+## Test File
 
 `configReader.test.ts`
 
-## 测试目的
+## Test Purpose
 
-确保 ConfigReader 服务正确读写配置文件，包括文件操作、JSON 解析、错误处理、文件监控等核心功能。该模块负责管理 `~/.claude.json` 配置文件中的权限状态。
+Ensure the ConfigReader service correctly reads and writes configuration files, including file operations, JSON parsing, error handling, file monitoring, and other core functionalities. This module is responsible for managing permission state in the `~/.claude.json` configuration file.
 
-## 测试用例概览
+## Test Case Overview
 
-| 用例 ID | 功能描述                               | 测试类型 |
-| ------- | -------------------------------------- | -------- |
-| CR-01   | 读取存在的配置文件并返回权限状态       | 正向测试 |
-| CR-02   | 配置文件不存在时返回 false             | 正向测试 |
-| CR-03   | 配置文件 JSON 格式错误时返回 false     | 异常测试 |
-| CR-04   | bypassPermissionsModeAccepted 字段缺失 | 正向测试 |
-| CR-05   | 设置权限状态到新文件                   | 正向测试 |
-| CR-06   | 更新现有配置文件保留其他字段           | 正向测试 |
-| CR-07   | 配置文件解析失败重试机制               | 异常测试 |
-| CR-08   | 创建目录如果不存在                     | 正向测试 |
-| CR-09   | 文件监控触发回调                       | 正向测试 |
-| CR-10   | dispose 清理文件监控                   | 正向测试 |
+| Case ID | Feature Description                                      | Test Type     |
+| ------- | -------------------------------------------------------- | ------------- |
+| CR-01   | Read existing config file and return permission status  | Positive test |
+| CR-02   | Return false when config file does not exist           | Positive test |
+| CR-03   | Return false when config file JSON format is invalid   | Exception test |
+| CR-04   | bypassPermissionsModeAccepted field missing            | Positive test |
+| CR-05   | Set permission status to new file                      | Positive test |
+| CR-06   | Update existing config file preserving other fields    | Positive test |
+| CR-07   | Config file parse failure retry mechanism              | Exception test |
+| CR-08   | Create directory if it doesn't exist                   | Positive test |
+| CR-09   | File monitoring triggers callback                       | Positive test |
+| CR-10   | dispose cleans up file monitoring                      | Positive test |
 
-## 详细测试步骤
+## Detailed Test Steps
 
-### CR-01: 读取存在的配置文件并返回权限状态
+### CR-01: Read Existing Config File and Return Permission Status
 
-**测试目的**: 验证能正确读取配置文件中的权限状态
+**Test Purpose**: Verify ability to correctly read permission status from config file
 
-**准备数据**:
+**Test Data**:
 
-- Mock 文件存在且内容为：
+- Mock file exists with content:
 
   ```json
   {
@@ -40,68 +40,68 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 ConfigReader 实例
-2. Mock fs.existsSync 返回 true
-3. Mock fs.promises.readFile 返回配置内容
-4. 调用 `getBypassPermissionStatus()`
-5. 验证返回值
+1. Create ConfigReader instance
+2. Mock fs.existsSync to return true
+3. Mock fs.promises.readFile to return config content
+4. Call `getBypassPermissionStatus()`
+5. Verify return value
 
-**预期结果**:
+**Expected Results**:
 
-- 返回 `true`
-- 不输出错误日志
-- fs.promises.readFile 被调用，路径为 `~/.claude.json`
+- Return `true`
+- Do not output error logs
+- fs.promises.readFile is called with path `~/.claude.json`
 
-### CR-02: 配置文件不存在时返回 false
+### CR-02: Return False When Config File Does Not Exist
 
-**测试目的**: 验证文件不存在时的默认行为
+**Test Purpose**: Verify default behavior when file does not exist
 
-**准备数据**:
+**Test Data**:
 
-- Mock fs.existsSync 返回 false
+- Mock fs.existsSync to return false
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 ConfigReader 实例
-2. 调用 `getBypassPermissionStatus()`
-3. 验证返回值和日志
+1. Create ConfigReader instance
+2. Call `getBypassPermissionStatus()`
+3. Verify return value and logs
 
-**预期结果**:
+**Expected Results**:
 
-- 返回 `false`
-- 日志包含: `[ConfigReader] Config file not found: /Users/.../`.claude.json`
-- 不调用 fs.promises.readFile
+- Return `false`
+- Log contains: `[ConfigReader] Config file not found: /Users/.../`.claude.json`
+- Do not call fs.promises.readFile
 
-### CR-03: 配置文件 JSON 格式错误时返回 false
+### CR-03: Return False When Config File JSON Format Is Invalid
 
-**测试目的**: 验证 JSON 解析错误时的错误处理
+**Test Purpose**: Verify error handling when JSON parsing fails
 
-**准备数据**:
+**Test Data**:
 
-- Mock 文件内容为无效 JSON: `{ invalid json }`
+- Mock file content as invalid JSON: `{ invalid json }`
 
-**测试步骤**:
+**Test Steps**:
 
-1. Mock fs.existsSync 返回 true
-2. Mock fs.promises.readFile 返回无效 JSON
-3. 调用 `getBypassPermissionStatus()`
-4. 验证错误处理
+1. Mock fs.existsSync to return true
+2. Mock fs.promises.readFile to return invalid JSON
+3. Call `getBypassPermissionStatus()`
+4. Verify error handling
 
-**预期结果**:
+**Expected Results**:
 
-- 返回 `false`
-- 日志包含: `[ConfigReader] Error reading config:`
-- 不抛出未捕获的异常
+- Return `false`
+- Log contains: `[ConfigReader] Error reading config:`
+- Do not throw uncaught exceptions
 
-### CR-04: bypassPermissionsModeAccepted 字段缺失
+### CR-04: bypassPermissionsModeAccepted Field Missing
 
-**测试目的**: 验证字段缺失时返回 false
+**Test Purpose**: Verify return false when field is missing
 
-**准备数据**:
+**Test Data**:
 
-- Mock 文件内容为：
+- Mock file content as:
 
   ```json
   {
@@ -109,37 +109,37 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. Mock 文件存在并返回上述内容
-2. 调用 `getBypassPermissionStatus()`
-3. 验证返回值
+1. Mock file exists and returns above content
+2. Call `getBypassPermissionStatus()`
+3. Verify return value
 
-**预期结果**:
+**Expected Results**:
 
-- 返回 `false`（字段缺失或非 true 都返回 false）
-- 正常完成，不报错
+- Return `false` (missing field or non-true values return false)
+- Complete normally, no errors
 
-### CR-05: 设置权限状态到新文件
+### CR-05: Set Permission Status to New File
 
-**测试目的**: 验证创建新配置文件并设置权限
+**Test Purpose**: Verify creation of new config file and setting permissions
 
-**准备数据**:
+**Test Data**:
 
-- Mock 文件不存在
-- 设置权限值为 true
+- Mock file does not exist
+- Set permission value to true
 
-**测试步骤**:
+**Test Steps**:
 
-1. Mock fs.existsSync 返回 false
-2. Mock fs.promises.mkdir 和 fs.promises.writeFile
-3. 调用 `setBypassPermission(true)`
-4. 验证文件操作
+1. Mock fs.existsSync to return false
+2. Mock fs.promises.mkdir and fs.promises.writeFile
+3. Call `setBypassPermission(true)`
+4. Verify file operations
 
-**预期结果**:
+**Expected Results**:
 
-- fs.promises.mkdir 被调用（创建目录）
-- fs.promises.writeFile 被调用，内容为：
+- fs.promises.mkdir is called (create directory)
+- fs.promises.writeFile is called with content:
 
   ```json
   {
@@ -147,16 +147,16 @@
   }
   ```
 
-- 使用 2 空格缩进
-- 日志包含: `[ConfigReader] Set bypassPermissionsModeAccepted to true`
+- Use 2-space indentation
+- Log contains: `[ConfigReader] Set bypassPermissionsModeAccepted to true`
 
-### CR-06: 更新现有配置文件保留其他字段
+### CR-06: Update Existing Config File Preserving Other Fields
 
-**测试目的**: 验证更新配置时保留原有字段
+**Test Purpose**: Verify updating config while preserving original fields
 
-**准备数据**:
+**Test Data**:
 
-- Mock 现有文件内容：
+- Mock existing file content:
 
   ```json
   {
@@ -166,140 +166,140 @@
   }
   ```
 
-**测试步骤**:
+**Test Steps**:
 
-1. Mock 文件存在并返回上述内容
-2. 调用 `setBypassPermission(true)`
-3. 验证写入的内容
+1. Mock file exists and returns above content
+2. Call `setBypassPermission(true)`
+3. Verify written content
 
-**预期结果**:
+**Expected Results**:
 
-- fs.promises.writeFile 被调用，内容包含所有原有字段
-- `bypassPermissionsModeAccepted` 更新为 true
-- 其他字段保持不变
-- 保持正确的 JSON 格式
+- fs.promises.writeFile is called with content containing all original fields
+- `bypassPermissionsModeAccepted` updated to true
+- Other fields remain unchanged
+- Maintain correct JSON format
 
-### CR-07: 配置文件解析失败重试机制
+### CR-07: Config File Parse Failure Retry Mechanism
 
-**测试目的**: 验证 JSON 解析失败时的重试逻辑
+**Test Purpose**: Verify retry logic when JSON parsing fails
 
-**准备数据**:
+**Test Data**:
 
-- Mock 文件内容为无效 JSON
-- 重试仍然失败
+- Mock file content as invalid JSON
+- Retry still fails
 
-**测试步骤**:
+**Test Steps**:
 
-1. Mock 文件存在但内容无效
-2. 调用 `setBypassPermission(true)`
-3. 验证重试行为
+1. Mock file exists but content is invalid
+2. Call `setBypassPermission(true)`
+3. Verify retry behavior
 
-**预期结果**:
+**Expected Results**:
 
-- JSON.parse 被调用 3 次（初始 + 2 次重试）
-- 日志包含重试信息
-- 最终使用空对象作为配置
-- 成功写入新配置
+- JSON.parse is called 3 times (initial + 2 retries)
+- Log contains retry information
+- Finally use empty object as configuration
+- Successfully write new configuration
 
-### CR-08: 创建目录如果不存在
+### CR-08: Create Directory If It Doesn't Exist
 
-**测试目的**: 验证自动创建配置目录
+**Test Purpose**: Verify automatic creation of config directory
 
-**准备数据**:
+**Test Data**:
 
-- Mock 目录不存在
+- Mock directory does not exist
 - Mock fs.promises.mkdir
 
-**测试步骤**:
+**Test Steps**:
 
-1. Mock 目录检查返回 false
-2. 调用 `setBypassPermission(true)`
-3. 验证目录创建
+1. Mock directory check returns false
+2. Call `setBypassPermission(true)`
+3. Verify directory creation
 
-**预期结果**:
+**Expected Results**:
 
-- fs.promises.mkdir 被调用
-- 使用 `{ recursive: true }` 选项
-- 目录路径正确（用户主目录）
+- fs.promises.mkdir is called
+- Use `{ recursive: true }` option
+- Directory path is correct (user home directory)
 
-### CR-09: 文件监控触发回调
+### CR-09: File Monitoring Triggers Callback
 
-**测试目的**: 验证文件变化时触发回调
+**Test Purpose**: Verify callback is triggered when file changes
 
-**准备数据**:
+**Test Data**:
 
 - Mock fs.watchFile
-- 模拟文件变化事件
+- Simulate file change events
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 ConfigReader 实例
-2. 注册监控回调
-3. 调用 `watchConfigFile(callback)`
-4. 模拟文件变化
-5. 验证回调被调用
+1. Create ConfigReader instance
+2. Register monitoring callback
+3. Call `watchConfigFile(callback)`
+4. Simulate file change
+5. Verify callback is called
 
-**预期结果**:
+**Expected Results**:
 
-- fs.watchFile 被调用，监控间隔为 2000ms
-- 文件变化时回调被触发
-- 日志包含: `[ConfigReader] Started watching config file`
+- fs.watchFile is called with monitoring interval 2000ms
+- Callback is triggered when file changes
+- Log contains: `[ConfigReader] Started watching config file`
 
-### CR-10: dispose 清理文件监控
+### CR-10: dispose Cleans Up File Monitoring
 
-**测试目的**: 验证资源清理正确执行
+**Test Purpose**: Verify resource cleanup is executed correctly
 
-**准备数据**:
+**Test Data**:
 
-- 已设置文件监控
+- File monitoring already set up
 
-**测试步骤**:
+**Test Steps**:
 
-1. 创建 ConfigReader 并设置监控
-2. 调用 `dispose()`
-3. 验证清理操作
+1. Create ConfigReader and set up monitoring
+2. Call `dispose()`
+3. Verify cleanup operations
 
-**预期结果**:
+**Expected Results**:
 
-- fs.unwatchFile 被调用
-- 日志包含: `[ConfigReader] Stopped watching config file`
-- 不会再触发回调
+- fs.unwatchFile is called
+- Log contains: `[ConfigReader] Stopped watching config file`
+- No more callbacks will be triggered
 
-## 测试注意事项
+## Test Considerations
 
-### Mock 策略
+### Mocking Strategy
 
-- Mock fs 模块的所有方法（existsSync, promises.readFile, promises.writeFile, promises.mkdir）
-- Mock fs.watchFile 和 fs.unwatchFile
-- Mock os.homedir() 返回固定路径
-- Mock OutputChannel 的 appendLine 方法
+- Mock all fs module methods (existsSync, promises.readFile, promises.writeFile, promises.mkdir)
+- Mock fs.watchFile and fs.unwatchFile
+- Mock os.homedir() to return fixed path
+- Mock OutputChannel's appendLine method
 
-### 文件路径处理
+### File Path Handling
 
-- 配置文件路径：`~/.claude.json`
-- 需要正确处理路径拼接
-- 测试时使用固定的 home 目录路径
+- Config file path: `~/.claude.json`
+- Need to correctly handle path concatenation
+- Use fixed home directory path during testing
 
-### JSON 处理
+### JSON Processing
 
-- 写入时使用 2 空格缩进
-- 保持字段顺序（虽然 JSON 不保证顺序）
-- 处理各种无效 JSON 情况
+- Use 2-space indentation when writing
+- Maintain field order (although JSON doesn't guarantee order)
+- Handle various invalid JSON situations
 
-### 错误处理
+### Error Handling
 
-- 文件读写错误需要被捕获
-- JSON 解析错误有重试机制
-- 所有错误都记录到 OutputChannel
+- File read/write errors need to be caught
+- JSON parsing errors have retry mechanism
+- All errors are logged to OutputChannel
 
-### 异步操作
+### Async Operations
 
-- 所有文件操作都是异步的
-- 使用 async/await 处理 Promise
-- 测试需要正确处理异步
+- All file operations are asynchronous
+- Use async/await to handle Promises
+- Tests need to properly handle async operations
 
-### 文件监控
+### File Monitoring
 
-- 使用 fs.watchFile 而非 fs.watch
-- 监控间隔 2000ms
-- 只在文件修改时间变化时触发回调
+- Use fs.watchFile instead of fs.watch
+- Monitoring interval 2000ms
+- Only trigger callback when file modification time changes

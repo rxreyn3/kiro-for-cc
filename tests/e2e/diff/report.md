@@ -1,49 +1,49 @@
-# Kiro for Claude Code v0.1.8 到 v0.1.9 提示词更新分析报告
+# Kiro for Claude Code v0.1.8 to v0.1.9 Prompt Update Analysis Report
 
-## 执行摘要
+## Executive Summary
 
-本报告分析了 Kiro for Claude Code 扩展从版本 0.1.8 到 0.1.9 的提示词变更。主要发现：
+This report analyzes the prompt changes in the Kiro for Claude Code extension from version 0.1.8 to 0.1.9. Key findings:
 
-- **无破坏性变更**：经测试验证，所有更新均为改进性质，不会影响现有功能
-- **主要改进**：移除了用户全局配置的注入，增强了提示词的独立性和专业性
-- **风险评估**：低风险，更新提升了系统的稳定性和可预测性
+- **No Breaking Changes**: Testing confirmed that all updates are improvements and do not affect existing functionality
+- **Key Improvements**: Removed user global configuration injection, enhanced prompt independence and professionalism
+- **Risk Assessment**: Low risk, updates improved system stability and predictability
 
-## 背景说明
+## Background
 
-### 关于被移除的中文指令
+### About the Removed Chinese Instructions
 
-被删除的中文指令内容实际上来自 `~/.claude/CLAUDE.md`（用户的全局配置文件），并非提示词本身的一部分：
+The deleted Chinese instruction content actually came from `~/.claude/CLAUDE.md` (user's global configuration file), not part of the prompts themselves:
 
 ```plain
-用中文回答我
+Answer me in English
 
-每次都用审视的目光，仔细看我输入的潜在问题，你要指出我的问题，并给出明显在我思考框架之外的建议
-如果你觉得我说的太离谱了，你就骂回来，帮我瞬间清醒
+Each time, use a critical perspective, carefully examine potential issues in my input, point out my problems, and provide suggestions that are clearly outside my thinking framework
+If you think what I'm saying is too outrageous, scold me back to help me wake up instantly
 ```
 
-### 移除原因
+### Reason for Removal
 
-**Claude CLI 会自动注入全局配置内容**。经过测试验证：
+**Claude CLI automatically injects global configuration content**. Verified through testing:
 
-- 当 `~/.claude/CLAUDE.md` 中包含用户配置时，claude 命令会自动将其内容添加到提示词中
-- 示例：如果在 `~/.claude/CLAUDE.md` 中声明"我是张三"，运行 `claude "我是谁"` 会输出"张三"
-- 因此，在扩展的提示词模板中再次包含这些内容会造成重复
+- When `~/.claude/CLAUDE.md` contains user configuration, the claude command automatically adds its content to prompts
+- Example: If "I am Zhang San" is declared in `~/.claude/CLAUDE.md`, running `claude "Who am I"` will output "Zhang San"
+- Therefore, including this content again in the extension's prompt templates causes duplication
 
-**v0.1.9 的改进**：通过移除这些重复内容，避免了配置的双重注入，使提示词更加纯粹和可控。
+**v0.1.9 Improvements**: By removing this duplicate content, avoided double injection of configuration, making prompts purer and more controllable.
 
-## 提示词对比示例
+## Prompt Comparison Examples
 
-### refine-steering.md 完整对比
+### refine-steering.md Complete Comparison
 
-**v0.1.8 版本**：
+**v0.1.8 Version**:
 
 ```markdown
 <system>
-  用中文回答我
+  Answer me in English
 
-  每次都用审视的目光，仔细看我输入的潜在问题，你要指出我的问题，并给出明
-  显在我思考框架之外的建议
-  如果你觉得我说的太离谱了，你就骂回来，帮我瞬间清醒
+  Each time, use a critical perspective, carefully examine potential issues in my input, point out my problems, and provide
+  suggestions that are clearly outside my thinking framework
+  If you think what I'm saying is too outrageous, scold me back to help me wake up instantly
 
 ## Additional Instructions for this Task
 
@@ -72,7 +72,7 @@ Please refine the steering document at
 /Users/notdp/e2e-test/.claude/steering/product.md
 
 Current content:
-这是我手写的 product.md 的内容
+This is the handwritten content of product.md
 
 Refine this document to:
 1. Make instructions more specific to this project's patterns
