@@ -150,24 +150,49 @@ export class HooksExplorerProvider implements vscode.TreeDataProvider<HookItem> 
     private async getClaudeCodeHooks(): Promise<{name: string, enabled: boolean, config: any, configPath: string}[]> {
         const hooks: {name: string, enabled: boolean, config: any, configPath: string}[] = [];
         
-        // Check workspace .claude/settings.json first
+        // Check workspace .claude/settings.local.json and .claude/settings.json
         if (vscode.workspace.workspaceFolders) {
-            const workspaceConfigPath = path.join(
+            const claudeDir = path.join(
                 vscode.workspace.workspaceFolders[0].uri.fsPath,
-                '.claude',
-                'settings.json'
+                '.claude'
             );
-            if (fs.existsSync(workspaceConfigPath)) {
+            
+            // Check settings.local.json first (takes precedence)
+            const localConfigPath = path.join(claudeDir, 'settings.local.json');
+            if (fs.existsSync(localConfigPath)) {
                 try {
-                    const config = JSON.parse(fs.readFileSync(workspaceConfigPath, 'utf8'));
+                    const config = JSON.parse(fs.readFileSync(localConfigPath, 'utf8'));
                     if (config.hooks) {
                         Object.entries(config.hooks).forEach(([name, value]) => {
                             hooks.push({
                                 name,
                                 enabled: true,
                                 config: value,
-                                configPath: workspaceConfigPath
+                                configPath: localConfigPath
                             });
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to read workspace local Claude Code hooks:', error);
+                }
+            }
+            
+            // Then check settings.json
+            const workspaceConfigPath = path.join(claudeDir, 'settings.json');
+            if (fs.existsSync(workspaceConfigPath)) {
+                try {
+                    const config = JSON.parse(fs.readFileSync(workspaceConfigPath, 'utf8'));
+                    if (config.hooks) {
+                        Object.entries(config.hooks).forEach(([name, value]) => {
+                            // Only add if not already added from settings.local.json
+                            if (!hooks.find(h => h.name === name)) {
+                                hooks.push({
+                                    name,
+                                    enabled: true,
+                                    config: value,
+                                    configPath: workspaceConfigPath
+                                });
+                            }
                         });
                     }
                 } catch (error) {
